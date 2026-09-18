@@ -26,12 +26,11 @@ The source data is transformed into a common canonical representation and analyz
 
 The current phase consists of:
 
-1. PostgreSQL dataset setup
-2. BugHub source-label extraction
-3. Canonical dataset construction
-4. Data normalization
-5. Data quality filtering
-6. Exploratory Data Analysis (EDA)
+1. Canonical Parquet dataset input
+2. Stage 2 preprocessing validation
+3. Schema, label, identity, timestamp, and text checks
+4. Parquet-based Exploratory Data Analysis (EDA)
+5. EDA report generation
 
 The next phase will be:
 

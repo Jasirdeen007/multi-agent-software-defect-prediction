@@ -987,18 +987,13 @@ Current EDA files:
 
 ```text
 src/eda/
-├── 01_basic_overview.py
-├── 02_text_statistics.py
-├── 03_project_distribution.py
-├── 04_missingness.py
-├── 05_temporal_distribution.py
-└── 06_generate_eda_report.py
+└── run_eda_pipeline.py
 ```
 
 EDA MUST use:
 
 ```text
-agenttriage.canonical_dataset
+data/processed/bughubs_canonical.parquet
 ```
 
 ---
@@ -1040,7 +1035,7 @@ Use:
 model_text
 ```
 
-Do not unnecessarily retrieve the entire text column when SQL aggregation is sufficient.
+Do not unnecessarily load unrelated Parquet columns when column projection is sufficient.
 
 ---
 
@@ -1098,18 +1093,18 @@ Temporal structure may affect future train/test design.
 
 # 26. EDA Report
 
-The final EDA report should be generated from the actual PostgreSQL data.
+The final EDA report should be generated from the canonical Parquet artifact.
 
 Script:
 
 ```text
-src/eda/06_generate_eda_report.py
+src/eda/run_eda_pipeline.py
 ```
 
 Run:
 
 ```bash
-python src/eda/06_generate_eda_report.py
+python src/eda/run_eda_pipeline.py
 ```
 
 Output:
@@ -1135,7 +1130,7 @@ Implications for SDP
 Next phase
 ```
 
-Do not hardcode changing database statistics into the final report generator.
+Do not hardcode changing dataset statistics into the final report generator.
 
 ---
 
@@ -1165,12 +1160,7 @@ Multi-Agent-SDP/
 │   │
 │   └── eda/
 │       ├── __init__.py
-│       ├── 01_basic_overview.py
-│       ├── 02_text_statistics.py
-│       ├── 03_project_distribution.py
-│       ├── 04_missingness.py
-│       ├── 05_temporal_distribution.py
-│       └── 06_generate_eda_report.py
+│       └── run_eda_pipeline.py
 │
 ├── docs/
 │   ├── DATASET_DESCRIPTION.md
@@ -1286,17 +1276,8 @@ non-bug   | 277620
 Run from repository root:
 
 ```bash
-python src/eda/01_basic_overview.py
-python src/eda/02_text_statistics.py
-python src/eda/03_project_distribution.py
-python src/eda/04_missingness.py
-python src/eda/05_temporal_distribution.py
-```
-
-Then:
-
-```bash
-python src/eda/06_generate_eda_report.py
+python src/preprocessing/validate_canonical_parquet.py
+python src/eda/run_eda_pipeline.py
 ```
 
 Generated outputs:
@@ -1316,7 +1297,7 @@ outputs/
 When writing SQL:
 
 1. Fully qualify project tables where ambiguity is possible.
-2. Use `agenttriage.canonical_dataset` for downstream EDA.
+2. Use `data/processed/bughubs_canonical.parquet` for downstream EDA.
 3. Respect `(source, project, issue_id)` identity.
 4. Avoid destructive operations unless explicitly requested.
 5. Prefer `SELECT` validation before `DELETE`, `UPDATE`, or `ALTER`.

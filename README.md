@@ -12,9 +12,9 @@ Labels are the original BugHub source labels (`bug`, `non-bug`). They are not tr
 ## Repository structure
 - `sql/` — PostgreSQL inspection, extraction, validation and canonical-dataset SQL.
 - `src/preprocessing/` — reusable Python preprocessing/validation scripts.
-- `src/eda/` — EDA scripts; add one focused script per analysis.
+- `src/eda/` — Parquet-based EDA pipeline and report generation.
 - `data/raw/` — local raw data/database exports; ignored by Git.
-- `data/processed/` — generated datasets; ignored by Git unless a small sample is intentionally committed.
+- `data/processed/` — processed project data. The canonical Parquet dataset is intentionally kept in the repo.
 - `outputs/` — generated EDA tables and figures.
 - `notebooks/` — exploratory notebooks only; reusable logic belongs in `src/`.
 - `docs/` — methodology and dataset notes.
