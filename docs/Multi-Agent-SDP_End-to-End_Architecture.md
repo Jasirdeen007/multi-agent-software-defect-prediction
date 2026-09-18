@@ -11,6 +11,13 @@ labels**, produced before model training, provide a measurable change in
 downstream software defect prediction compared with the original BugHub
 labels.
 
+The finalized research flow uses **selective multi-agent auditing**:
+the complete canonical population is processed deterministically, while
+a representative audit subset is passed through the Knowledge Graph,
+agent council, and Judge. This keeps the project feasible and focuses
+LLM reasoning on label verification, evidence extraction, ambiguity
+detection, and disagreement analysis.
+
 The implementation starts from the **already prepared canonical Parquet
 dataset**. PostgreSQL/SQL extraction is therefore outside the
 implementation workflow described here.
@@ -347,7 +354,48 @@ The principal experimental variable is the **label source**.
 
 ------------------------------------------------------------------------
 
-# 7. Stage 5 --- Knowledge Graph
+# 7. Stage 5 --- Selective Audit Sampling
+
+The complete canonical population is retained for deterministic
+preprocessing, EDA, splitting, and baseline modelling. It is **not**
+all sent through the expensive LLM agent council.
+
+A representative audit subset is selected for multi-agent label
+auditing. The sampling design should preserve variation in:
+
+-   issue-tracking source
+-   project
+-   original label
+-   text length
+-   metadata completeness
+-   potentially ambiguous cases
+-   project/time split membership where relevant
+
+The purpose of selective auditing is to use LLM reasoning where it can
+add value: label verification, evidence extraction, ambiguity detection,
+and disagreement analysis.
+
+Audit sample size is an experimental design decision. A fixed number
+such as 20,000 should not be treated as a proven requirement. A
+defensible approach is:
+
+``` text
+pilot sample
+     ↓
+measure agreement / disagreement / label changes
+     ↓
+increase sample if needed
+     ↓
+check stability of audit estimates
+     ↓
+finalize audit sample size
+```
+
+Sampling configuration should be versioned and reproducible.
+
+------------------------------------------------------------------------
+
+# 8. Stage 6 --- Knowledge Graph
 
 The Knowledge Graph provides structured project context to the
 label-auditing agents.
@@ -376,12 +424,14 @@ taxonomy nodes that are not supported by available data.
 
 ------------------------------------------------------------------------
 
-# 8. Stage 6 --- Multi-Agent Label Audit
+# 9. Stage 7 --- Multi-Agent Label Audit
 
 This is the central research component.
 
-The original label is supplied to the auditing process together with the
-issue information and available structured evidence.
+The original label is supplied to the selective auditing process
+together with the issue information and available structured evidence.
+Only records selected by the audit-sampling stage enter this agent
+council.
 
 ``` text
 Issue
@@ -424,7 +474,7 @@ Issue
    + rationale + agent evidence
 ```
 
-## 8.1 Policy Agent
+## 9.1 Policy Agent
 
 Examines the issue against explicit project/data-label policies and
 available structured rules.
@@ -438,7 +488,7 @@ evidence
 reasoning/rationale
 ```
 
-## 8.2 Data Agent
+## 9.2 Data Agent
 
 Examines available issue metadata and dataset evidence.
 
@@ -451,7 +501,7 @@ evidence
 reasoning/rationale
 ```
 
-## 8.3 Pattern Agent
+## 9.3 Pattern Agent
 
 Examines the issue text and relevant issue patterns.
 
@@ -464,7 +514,7 @@ evidence
 reasoning/rationale
 ```
 
-## 8.4 Judge Agent
+## 9.4 Judge Agent
 
 The Judge receives the individual agent outputs and available KG
 evidence.
@@ -483,9 +533,9 @@ considering evidence.
 
 ------------------------------------------------------------------------
 
-# 9. Stage 7 --- Agent Audit Record
+# 10. Stage 8 --- Agent Audit Record
 
-For every audited issue, preserve an audit record.
+For every selectively audited issue, preserve an audit record.
 
 A practical structure is:
 
@@ -513,8 +563,6 @@ judge_confidence
 judge_rationale
 
 agent_agreement
-human_review_required
-human_label
 final_audited_label
 ```
 
@@ -525,26 +573,27 @@ Do not overwrite `original_label`.
 
 ------------------------------------------------------------------------
 
-# 10. Stage 8 --- Human-in-the-Loop Validation
+# 11. Stage 9 --- Human-in-the-Loop Operational Review
 
-Human review is used when the audit decision requires human confirmation
-according to the project's review policy.
+Human-in-the-loop review is **not part of the training-time
+architecture**. It belongs to the operational inference phase, where new
+or low-confidence cases may be routed to a human tester.
 
 Typical triggers can include:
 
 ``` text
-low Judge confidence
-high agent disagreement
-policy conflict
-insufficient evidence
+low model confidence
+uncertain SHAP-supported prediction
+insufficient operational evidence
+tester review policy trigger
 ```
 
 The system records:
 
 ``` text
-original_label
-agent_audited_label
-agent_confidence
+model_prediction
+model_confidence
+shap_explanation
 human_label
 review_reason
 ```
@@ -555,17 +604,17 @@ If the tester disagrees with the model/agent decision:
 model/agent output ≠ human decision
 ```
 
-the original machine outputs remain in the audit record.
+the original machine outputs remain in the operational log.
 
-The human decision becomes the final decision for that reviewed case.
+The human decision becomes the final operational decision for that
+reviewed case.
 
-Human feedback is not automatically injected into model training. A
-later controlled retraining process can use approved human-labelled
-data.
+Human feedback is not automatically injected into model training. A later
+controlled retraining process can use approved human-labelled data.
 
 ------------------------------------------------------------------------
 
-# 11. Stage 9 --- Agent-Audited Dataset
+# 12. Stage 10 --- Agent-Audited Dataset
 
 After the audit process:
 
@@ -580,7 +629,9 @@ Canonical dataset
        agent_audited_label
 ```
 
-The resulting dataset contains both label sources.
+The resulting dataset contains both label sources for audited records.
+Unaudited records retain their original BugHub label unless a later
+experiment explicitly defines how to use partial audit coverage.
 
 Conceptually:
 
@@ -601,7 +652,7 @@ label provenance.
 
 ------------------------------------------------------------------------
 
-# 12. Stage 10 --- Treatment Experiment
+# 13. Stage 11 --- Treatment Experiment
 
 The treatment uses the same model pipeline as the baseline, but replaces
 the training target with the audited label.
@@ -637,7 +688,7 @@ agent-audited label
 
 ------------------------------------------------------------------------
 
-# 13. Stage 11 --- DeBERTa-v3 Embedding Pipeline
+# 14. Stage 12 --- DeBERTa-v3 Embedding Pipeline
 
 For both baseline and treatment:
 
@@ -660,7 +711,7 @@ test labels.
 
 ------------------------------------------------------------------------
 
-# 14. Stage 12 --- XGBoost Classifier
+# 15. Stage 13 --- XGBoost Classifier
 
 The DeBERTa representation becomes the feature vector for XGBoost.
 
@@ -682,7 +733,7 @@ or the same controlled hyperparameter-selection procedure.
 
 ------------------------------------------------------------------------
 
-# 15. Stage 13 --- SHAP Explainability
+# 16. Stage 14 --- SHAP Explainability
 
 SHAP is applied to the trained XGBoost model.
 
@@ -707,7 +758,7 @@ SHAP is an explanation layer. It does not change the prediction.
 
 ------------------------------------------------------------------------
 
-# 16. Stage 14 --- Evaluation
+# 17. Stage 15 --- Evaluation
 
 The two experiments are evaluated using the same held-out data and
 evaluation protocol.
@@ -741,7 +792,7 @@ experiment produces the corresponding evidence.
 
 ------------------------------------------------------------------------
 
-# 17. Stage 15 --- Ablation Studies
+# 18. Stage 16 --- Ablation Studies
 
 The project materials identify ablations as part of the evaluation
 design.
@@ -770,7 +821,7 @@ practical.
 
 ------------------------------------------------------------------------
 
-# 18. Stage 16 --- Final Inference Workflow
+# 19. Stage 17 --- Final Inference Workflow
 
 After the treatment model has been trained:
 
@@ -837,7 +888,7 @@ The model prediction remains unchanged in the audit log.
 
 ------------------------------------------------------------------------
 
-# 19. Application Architecture
+# 20. Application Architecture
 
 The project also includes an application layer for presenting
 predictions and explanations.
@@ -889,60 +940,38 @@ serving workflow.
 
 ------------------------------------------------------------------------
 
-# 20. Experiment Data Flow
+# 21. Experiment Data Flow
 
 The complete research data flow is:
 
 ``` text
 Canonical Parquet
-       │
-       ▼
-Preprocessing
-       │
-       ▼
-Validated Dataset
-       │
-       ├─────────────────────────────┐
-       │                             │
-       ▼                             ▼
-Original Labels                 Agent Audit
-       │                             │
-       ▼                       KG + 3 Agents
-Baseline Training                    │
-       │                           Judge
-       ▼                             │
-DeBERTa-v3                           ▼
-       │                       Audited Labels
-       ▼                             │
-XGBoost                               ▼
-       │                         Treatment Training
-       ▼                             │
-Baseline Metrics                      ▼
-                              DeBERTa-v3
-                                     │
-                                     ▼
-                                  XGBoost
-                                     │
-                                     ▼
-                              Treatment Metrics
-                                     │
-                    ┌────────────────┘
-                    ▼
-             Comparative Evaluation
-                    │
-                    ▼
-               SHAP Analysis
-                    │
-                    ▼
-             Inference System
-                    │
-                    ▼
-             Human Review when needed
+-> preprocessing
+-> validated dataset
+-> controlled split
+   |
+   +-> original_label baseline
+   |   -> DeBERTa-v3
+   |   -> XGBoost
+   |   -> baseline metrics + SHAP
+   |
+   +-> selective audit sampling
+       -> Knowledge Graph evidence
+       -> Policy/Data/Pattern agents
+       -> Judge
+       -> audited silver labels
+       -> treatment dataset
+       -> DeBERTa-v3
+       -> XGBoost
+       -> treatment metrics + SHAP
+-> comparative evaluation
+-> inference system
+-> human review for low-confidence operational cases
 ```
 
 ------------------------------------------------------------------------
 
-# 21. Recommended Repository Mapping
+# 22. Recommended Repository Mapping
 
 ``` text
 Multi_agent_sdp/
@@ -1002,7 +1031,7 @@ Multi_agent_sdp/
 
 ------------------------------------------------------------------------
 
-# 22. Implementation Order
+# 23. Implementation Order
 
 Do not implement the whole system simultaneously.
 
@@ -1031,68 +1060,69 @@ Use this order:
 13. Generate SHAP explanations
 ```
 
-### Phase C --- Knowledge Graph
+### Phase C --- Selective Audit Sampling
 
 ``` text
-14. Define KG schema
-15. Populate supported project/taxonomy evidence
-16. Validate KG retrieval/evidence
+14. Define representative audit-sampling strategy
+15. Preserve source/project/label/text-length/metadata variation
+16. Select pilot audit subset
+17. Record sampling configuration and random seed
 ```
 
-### Phase D --- Agent Council
+### Phase D --- Knowledge Graph
 
 ``` text
-17. Implement Policy Agent
-18. Implement Data Agent
-19. Implement Pattern Agent
-20. Implement Judge
-21. Define confidence/disagreement rules
-22. Run audit
-23. Save complete audit trail
+18. Define KG schema
+19. Populate supported project/taxonomy evidence
+20. Validate KG retrieval/evidence
 ```
 
-### Phase E --- Human Validation
+### Phase E --- Agent Council
 
 ``` text
-24. Select cases requiring human review
-25. Record human decisions
-26. Produce final audited labels
-27. Measure agent/human agreement
+21. Implement Policy Agent
+22. Implement Data Agent
+23. Implement Pattern Agent
+24. Implement Judge
+25. Define confidence/disagreement rules
+26. Run audit on selected records
+27. Save complete audit trail
+28. Analyze agreement/disagreement and label-change rate
 ```
 
 ### Phase F --- Treatment
 
 ``` text
-28. Build treatment training dataset
-29. Generate DeBERTa embeddings
-30. Train XGBoost
-31. Evaluate using the same protocol
-32. Generate SHAP explanations
+29. Build treatment training dataset from audited silver labels
+30. Generate DeBERTa embeddings
+31. Train XGBoost
+32. Evaluate using the same protocol
+33. Generate SHAP explanations
 ```
 
 ### Phase G --- Research Evaluation
 
 ``` text
-33. Baseline vs treatment comparison
-34. Ablation studies
-35. Error analysis
-36. Statistical analysis where appropriate
-37. Produce final experiment report
+34. Baseline vs treatment comparison
+35. Ablation studies
+36. Error analysis
+37. Statistical analysis where appropriate
+38. Produce final experiment report
 ```
 
 ### Phase H --- Application
 
 ``` text
-38. FastAPI inference service
-39. React dashboard integration
-40. Human-review interface
-41. Prediction/audit logging
-42. Docker Compose deployment
+39. FastAPI inference service
+40. React dashboard integration
+41. Human-review interface for low-confidence operational cases
+42. Prediction/audit logging
+43. Docker Compose deployment
 ```
 
 ------------------------------------------------------------------------
 
-# 23. What Is Actually the Research Contribution?
+# 24. What Is Actually the Research Contribution?
 
 The project contribution is not simply:
 
@@ -1126,7 +1156,7 @@ training** changes downstream SDP results.
 
 ------------------------------------------------------------------------
 
-# 24. Important Scope Corrections
+# 25. Important Scope Corrections
 
 The earlier AgentTriage presentation contained a broader four-layer
 design that included:
@@ -1145,15 +1175,19 @@ The current implementation should remain focused on:
 
 ``` text
 Canonical dataset
-→ preprocessing
-→ multi-agent label auditing
-→ Judge
-→ human validation when required
-→ DeBERTa-v3
-→ XGBoost
-→ SHAP
-→ baseline/treatment comparison
-→ inference
+-> preprocessing
+-> controlled split
+-> original-label baseline
+-> selective audit sampling
+-> Knowledge Graph evidence
+-> multi-agent label auditing
+-> Judge
+-> audited silver labels
+-> DeBERTa-v3
+-> XGBoost
+-> SHAP
+-> baseline/treatment comparison
+-> inference with human review for low-confidence operational cases
 ```
 
 Do not reintroduce the removed components unless the project scope is
@@ -1161,7 +1195,7 @@ explicitly changed.
 
 ------------------------------------------------------------------------
 
-# 25. Reproducibility Requirements
+# 26. Reproducibility Requirements
 
 Every experiment should record:
 
@@ -1186,25 +1220,25 @@ source labels.
 
 ------------------------------------------------------------------------
 
-# 26. Final System Summary
+# 27. Final System Summary
 
 The final system can be represented in one line:
 
 ``` text
 Canonical Parquet
-→ preprocessing
-→ controlled split
-→ original-label baseline
-→ KG-guided multi-agent label audit
-→ Judge + audit trail
-→ human validation when required
-→ agent-audited dataset
-→ DeBERTa-v3 embeddings
-→ XGBoost SDP
-→ SHAP
-→ baseline/treatment evaluation
-→ inference API
-→ human review for low-confidence predictions
+-> preprocessing
+-> controlled split
+-> original-label baseline
+-> selective audit sampling
+-> KG-guided multi-agent label audit
+-> Judge + audit trail
+-> agent-audited silver-label dataset
+-> DeBERTa-v3 embeddings
+-> XGBoost SDP
+-> SHAP
+-> baseline/treatment evaluation
+-> inference API
+-> human review for low-confidence predictions
 ```
 
 The key experimental comparison is:
@@ -1230,3 +1264,4 @@ model training, explainability, evaluation, and deployment as separate
 modules**, allowing each component to be tested independently and the
 effect of agentic label auditing to be measured without changing the
 downstream model architecture.
+
