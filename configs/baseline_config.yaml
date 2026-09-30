@@ -1,0 +1,52 @@
+# ============================================================
+# Regularized Baseline Experiment Configuration
+# DeBERTa-v3 (frozen feature extractor) + Regularized XGBoost
+# Hardware Target: NVIDIA RTX 3050 Laptop GPU (4GB VRAM)
+# ============================================================
+
+model:
+  name: "microsoft/deberta-v3-small"
+  max_length: 256
+  batch_size: 32
+  use_fp16: true
+  pooling: "cls"        # [CLS] token embedding
+  device: "auto"        # auto | cuda | cpu
+
+data:
+  dataset_path: "bughubs_canonical.parquet"
+  text_column: "model_text"
+  label_column: "original_label"
+  label_map:
+    bug: 1
+    non-bug: 0
+  sample_size: 50000
+  test_size: 0.15
+  val_size: 0.15
+  random_seed: 42
+  stratify_column: "original_label"
+
+xgboost:
+  n_estimators: 500
+  max_depth: 4              # reduced from 6 to constrain tree complexity
+  learning_rate: 0.05       # gentler learning rate for smoother generalization
+  subsample: 0.7            # row bagging to prevent memorization
+  colsample_bytree: 0.6     # feature subsampling per tree
+  reg_alpha: 2.0            # L1 regularization on weights (promotes sparsity)
+  reg_lambda: 10.0          # L2 ridge regularization to prevent exploding weights
+  gamma: 1.0                # minimum loss reduction required for split
+  min_child_weight: 3.0     # prevents fitting tiny sample subsets
+  scale_pos_weight: 1.0     # calibrated threshold tuning handles balance
+  eval_metric: "logloss"
+  early_stopping_rounds: 35
+  random_state: 42
+  tree_method: "hist"
+  device: "cuda"
+
+shap:
+  sample_size: 500          # number of background samples to compute SHAP values efficiently
+
+output:
+  embeddings_dir: "data/embeddings"
+  model_dir: "outputs/models/baseline"
+  results_dir: "outputs/results/baseline"
+  figures_dir: "outputs/figures/baseline"

@@ -1,0 +1,22 @@
+{
+  "total_audited": 6,
+  "total_flips": 1,
+  "flip_rate": 0.1667,
+  "mean_agent_agreement": 0.945,
+  "unanimous_consensus_rate": 0.8333,
+  "majority_disagreement_rate": 0.1667,
+  "mean_confidences": {
+    "policy_agent": 0.9633,
+    "data_agent": 0.9167,
+    "pattern_agent": 0.955,
+    "judge_agent": 0.9467
+  },
+  "original_distribution": {
+    "bug": 0.8333,
+    "non-bug": 0.1667
+  },
+  "audited_distribution": {
+    "bug": 0.6667,
+    "non-bug": 0.3333
+  }
+}

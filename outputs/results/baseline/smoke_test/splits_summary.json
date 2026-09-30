@@ -1,0 +1,25 @@
+{
+  "random_seed": 42,
+  "total_records": 100,
+  "train": {
+    "records": 60,
+    "percentage": 60.0,
+    "bug_count": 42,
+    "non_bug_count": 18,
+    "bug_ratio": 0.7
+  },
+  "validation": {
+    "records": 20,
+    "percentage": 20.0,
+    "bug_count": 14,
+    "non_bug_count": 6,
+    "bug_ratio": 0.7
+  },
+  "test": {
+    "records": 20,
+    "percentage": 20.0,
+    "bug_count": 14,
+    "non_bug_count": 6,
+    "bug_ratio": 0.7
+  }
+}

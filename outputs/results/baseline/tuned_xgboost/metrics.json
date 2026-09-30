@@ -1,0 +1,28 @@
+{
+  "accuracy": 0.7883,
+  "balanced_accuracy": 0.712,
+  "precision_bug": 0.8151,
+  "recall_bug": 0.9023,
+  "f1_bug": 0.8565,
+  "precision_non_bug": 0.6955,
+  "recall_non_bug": 0.5216,
+  "f1_non_bug": 0.5961,
+  "macro_f1": 0.7263,
+  "weighted_f1": 0.7785,
+  "roc_auc": 0.831,
+  "matthews_corrcoef": 0.4653,
+  "brier_score": 0.1468,
+  "train_accuracy": 0.9026,
+  "overfitting_gap": 0.1143,
+  "optimal_threshold": 0.51,
+  "best_params": {
+    "max_depth": 5,
+    "learning_rate": 0.049348457506079316,
+    "subsample": 0.5910208008057041,
+    "colsample_bytree": 0.5300227369973126,
+    "reg_alpha": 3.771864196254839,
+    "reg_lambda": 7.572570339903153,
+    "gamma": 2.7160160641771274,
+    "min_child_weight": 1.0618704686614902
+  }
+}

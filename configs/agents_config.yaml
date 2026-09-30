@@ -1,0 +1,33 @@
+# Multi-Agent Defect Prediction Auditing Configuration
+llm:
+  provider: "groq"
+  subagent_model: "qwen/qwen3.8-27b"
+  judge_model: "openai/gpt-oss-120b"
+  fallback_model: "openai/gpt-oss-20b"
+  temperature: 0.1
+  max_tokens: 512
+  max_retries: 3
+  rate_limit_delay_seconds: 2.0
+
+audit:
+  dataset_path: "bughubs_canonical.parquet"
+  sample_size: 500
+  batch_size: 5
+  random_seed: 42
+  checkpoint_frequency: 25
+  output_dir: "outputs/results/audited"
+  output_parquet: "data/processed/audited_labels.parquet"
+
+roles:
+  policy_agent:
+    name: "Policy Compliance Agent"
+    focus: "Evaluate issue description against ISO/IEEE defect definitions (malfunction vs feature request)"
+  data_agent:
+    name: "Data & Metadata Consistency Agent"
+    focus: "Audit metadata consistency across severity, priority, component, resolution, and status"
+  pattern_agent:
+    name: "Defect Pattern Matching Agent"
+    focus: "Match textual patterns against historical software defects (crash dumps, regressions, exceptions)"
+  judge_agent:
+    name: "Arbitration & Synthesis Judge"
+    focus: "Synthesize agent verdicts, calculate agreement, resolve disputes, and determine final audited label"

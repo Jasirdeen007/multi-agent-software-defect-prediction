@@ -1,0 +1,15 @@
+{
+  "accuracy": 0.75,
+  "balanced_accuracy": 0.6786,
+  "precision_bug": 0.8,
+  "recall_bug": 0.8571,
+  "f1_bug": 0.8276,
+  "precision_non_bug": 0.6,
+  "recall_non_bug": 0.5,
+  "f1_non_bug": 0.5455,
+  "macro_f1": 0.6865,
+  "weighted_f1": 0.7429,
+  "roc_auc": 0.6667,
+  "matthews_corrcoef": 0.378,
+  "brier_score": 0.2196
+}

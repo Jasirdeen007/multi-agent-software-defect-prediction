@@ -1,0 +1,18 @@
+{
+  "accuracy": 0.7808,
+  "balanced_accuracy": 0.7222,
+  "precision_bug": 0.8272,
+  "recall_bug": 0.8685,
+  "f1_bug": 0.8473,
+  "precision_non_bug": 0.6519,
+  "recall_non_bug": 0.5759,
+  "f1_non_bug": 0.6115,
+  "macro_f1": 0.7294,
+  "weighted_f1": 0.7767,
+  "roc_auc": 0.8235,
+  "matthews_corrcoef": 0.4614,
+  "brier_score": 0.1505,
+  "train_accuracy": 0.8563,
+  "overfitting_gap": 0.0755,
+  "optimal_threshold": 0.57
+}

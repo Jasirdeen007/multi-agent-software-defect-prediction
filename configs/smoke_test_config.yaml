@@ -1,0 +1,43 @@
+﻿# Test configuration on small sample to quickly verify the pipeline
+model:
+  name: microsoft/deberta-v3-small
+  max_length: 128
+  batch_size: 16
+  use_fp16: true
+  pooling: cls
+  device: cuda
+
+data:
+  dataset_path: bughubs_canonical.parquet
+  text_column: model_text
+  label_column: original_label
+  label_map:
+    bug: 1
+    non-bug: 0
+  sample_size: 100
+  test_size: 0.20
+  val_size: 0.20
+  random_seed: 42
+  stratify_column: original_label
+
+xgboost:
+  n_estimators: 30
+  max_depth: 3
+  learning_rate: 0.1
+  subsample: 0.8
+  colsample_bytree: 0.8
+  scale_pos_weight: auto
+  eval_metric: logloss
+  early_stopping_rounds: 10
+  random_state: 42
+  tree_method: hist
+  device: cuda
+
+shap:
+  sample_size: 20
+
+output:
+  embeddings_dir: data/embeddings/smoke_test
+  model_dir: outputs/models/baseline/smoke_test
+  results_dir: outputs/results/baseline/smoke_test
+  figures_dir: outputs/figures/baseline/smoke_test

@@ -8,21 +8,29 @@ env/
 
 # Secrets / local config
 .env
-configs/*.yaml
-configs/*.yml
-!configs/config.example.yaml
+*.env.txt
+sgent.env.txt
+
+# Large binary datasets & embeddings (>100MB exceeds GitHub limits)
+*.parquet
+*.parquet.gz
+bughubs_canonical.parquet
+data/embeddings/
+*.npy
+
+# Unrelated external files
+thor_3d_model/
+*thor*
 
 # Raw / generated data
 *.sql
 *.sql.gz
 data/raw/*
-data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
 # Generated outputs
 outputs/eda/*
-outputs/figures/*
 outputs/tables/*
 !outputs/eda/.gitkeep
 !outputs/figures/.gitkeep
