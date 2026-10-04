@@ -1,0 +1,60 @@
+# ============================================================
+# Kaggle Full Baseline Configuration
+# DeBERTa-v3 frozen embeddings + XGBoost using original BugHub labels
+#
+# Kaggle setup:
+# 1. Upload bughubs_canonical.parquet as a Kaggle Dataset.
+# 2. Attach that Dataset to the notebook.
+# 3. Update data.dataset_path below to the attached dataset path.
+#    Example:
+#    /kaggle/input/multi-agent-sdp-canonical/bughubs_canonical.parquet
+#
+# Outputs must go under /kaggle/working because /kaggle/input is read-only.
+# ============================================================
+
+model:
+  name: "microsoft/deberta-v3-small"
+  max_length: 256
+  batch_size: 64
+  use_fp16: true
+  pooling: "cls"
+  device: "cuda"
+
+data:
+  dataset_path: "/kaggle/input/multi-agent-sdp-canonical/bughubs_canonical.parquet"
+  text_column: "model_text"
+  label_column: "original_label"
+  label_map:
+    bug: 1
+    non-bug: 0
+  sample_size: null
+  test_size: 0.15
+  val_size: 0.15
+  random_seed: 42
+  stratify_column: "original_label"
+
+xgboost:
+  n_estimators: 500
+  max_depth: 4
+  learning_rate: 0.05
+  subsample: 0.7
+  colsample_bytree: 0.6
+  reg_alpha: 2.0
+  reg_lambda: 10.0
+  gamma: 1.0
+  min_child_weight: 3.0
+  scale_pos_weight: 1.0
+  eval_metric: "logloss"
+  early_stopping_rounds: 35
+  random_state: 42
+  tree_method: "hist"
+  device: "cuda"
+
+shap:
+  sample_size: 500
+
+output:
+  embeddings_dir: "/kaggle/working/data/embeddings/full_baseline"
+  model_dir: "/kaggle/working/outputs/models/baseline/full"
+  results_dir: "/kaggle/working/outputs/results/baseline/full"
+  figures_dir: "/kaggle/working/outputs/figures/baseline/full"

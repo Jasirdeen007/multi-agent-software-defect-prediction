@@ -13,7 +13,7 @@ model:
   device: "auto"        # auto | cuda | cpu
 
 data:
-  dataset_path: "bughubs_canonical.parquet"
+  dataset_path: "data/processed/bughubs_canonical.parquet"
   text_column: "model_text"
   label_column: "original_label"
   label_map:
