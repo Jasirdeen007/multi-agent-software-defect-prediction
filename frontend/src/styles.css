@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@theme { --font-sans: "Inter", "Segoe UI", system-ui, sans-serif; }
+body { margin: 0; min-width: 320px; background: #f8fafc; }
+button, input, textarea { font: inherit; }
+
+.dashboard-shell { background: radial-gradient(circle at 82% -14%, #e0e7ff 0, transparent 30rem), #f8fafc; }
+.app-header { box-shadow: 0 1px 0 rgba(15, 23, 42, .03); }
+.brand-mark { box-shadow: 0 10px 22px rgba(79, 70, 229, .26); }
+.page-kicker { position: relative; padding-left: .8rem; }
+.page-kicker::before { position: absolute; left: 0; top: .1rem; height: .8rem; width: .2rem; border-radius: 999px; background: #4f46e5; content: ''; }
+.page-title { letter-spacing: -.045em; }
+.stat-card, .chart-card, .content-card, .result-empty { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.stat-card:hover, .chart-card:hover, .content-card:hover { transform: translateY(-2px); border-color: #c7d2fe; box-shadow: 0 16px 35px rgba(30, 41, 59, .08); }
+.stat-value { letter-spacing: -.055em; }
+.chart-card { position: relative; overflow: hidden; }
+.chart-card::after { position: absolute; right: -3rem; top: -4rem; z-index: 0; height: 9rem; width: 9rem; border-radius: 999px; background: rgba(238, 242, 255, .75); content: ''; }
+.chart-card > * { position: relative; z-index: 1; }
+.form-field { background: #fff; box-shadow: 0 1px 2px rgba(15, 23, 42, .02); }
+.form-field:hover { border-color: #94a3b8; }
+.primary-action { box-shadow: 0 10px 22px rgba(79, 70, 229, .24); }
+.primary-action:hover { box-shadow: 0 14px 26px rgba(79, 70, 229, .3); transform: translateY(-1px); }
+.result-empty { background: linear-gradient(145deg, #fff 0%, #f8faff 100%); }
+@media (max-width: 640px) { .app-header nav { max-width: 100%; overflow-x: auto; } .app-header nav a { white-space: nowrap; } }
