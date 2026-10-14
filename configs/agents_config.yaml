@@ -10,8 +10,8 @@ llm:
   rate_limit_delay_seconds: 2.0
 
 audit:
-  dataset_path: "bughubs_canonical.parquet"
-  sample_size: 500
+  dataset_path: "data/processed/audit_sample.parquet"
+  sample_size: 5000
   batch_size: 5
   random_seed: 42
   checkpoint_frequency: 25
