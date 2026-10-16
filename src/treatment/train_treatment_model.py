@@ -164,20 +164,20 @@ def train_treatment_pipeline(
 
 
     # 4. Train Regularized XGBoost Classifier
-    print("\nTraining Regularized XGBoost on Treatment Labels...")
+    print("\nTraining Regularized XGBoost on Treatment Labels (Anti-Overfitting Configuration)...")
     classifier = XGBoostBaselineClassifier(
-        n_estimators=500,
-        max_depth=4,
-        learning_rate=0.05,
-        subsample=0.7,
-        colsample_bytree=0.6,
-        reg_alpha=2.0,
-        reg_lambda=10.0,
-        gamma=1.0,
-        min_child_weight=3.0,
+        n_estimators=300,
+        max_depth=2,
+        learning_rate=0.03,
+        subsample=0.6,
+        colsample_bytree=0.5,
+        reg_alpha=10.0,
+        reg_lambda=30.0,
+        gamma=3.0,
+        min_child_weight=8.0,
         scale_pos_weight=1.0,
         eval_metric="logloss",
-        early_stopping_rounds=35,
+        early_stopping_rounds=25,
         tree_method="hist",
         device="cuda",
         random_state=random_seed,
