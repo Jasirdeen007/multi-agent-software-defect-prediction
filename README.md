@@ -285,18 +285,23 @@ model_text + KG contextual priors
 
 Artifacts:
 ```text
-outputs/knowledge_graph/kg_audit_sample.json (5,845 nodes, 24,651 typed edges)
-outputs/knowledge_graph/kg_summary.json
-outputs/figures/knowledge_graph/kg_ego_subgraph.png
+Micro Issue Graph:  outputs/knowledge_graph/kg_audit_sample.json (5,845 nodes, 24,651 typed edges)
+Macro Domain KG:    data/knowledge_graph/kg_macro_triples.csv (608 nodes, 5,000 Cypher triples across 926k issues)
+Macro KG Summary:   outputs/knowledge_graph/kg_macro_summary.json
+Ego Visualization:  outputs/figures/knowledge_graph/kg_ego_subgraph.png
+Query / Ingestion:  src/knowledge_graph/load_macro_kg.py
+                    src/knowledge_graph/retriever.py
 ```
 
-Entities:
-- `Issue`, `Project`, `Source`, `Component`, `Severity`, `Priority`, `Status`, `Resolution`
+### Knowledge Graph Architecture
+1. **Micro-Level Graph (Audit Sample)**:
+   - Entities: `Issue`, `Project`, `Source`, `Component`, `Severity`, `Priority`, `Status`, `Resolution`
+   - Typed Edges: `BELONGS_TO`, `TRACKED_IN`, `HAS_COMPONENT`, `HAS_SEVERITY`, `HAS_PRIORITY`, `HAS_STATUS`, `HAS_RESOLUTION`
+2. **Macro-Level Graph (Full 926,461 BugHub Population)**:
+   - Entities: `Dataset`, `Source`, `Project` (78 projects), `Component` (478 components), `Priority`, `Label`
+   - Relational Edges: `CO_OCCURS_WITH` (2,028 edges), `DEFECT_CLUSTER` (991 edges), `HAS_COMPONENT` (704 edges), `CROSS_SOURCE_PATTERN` (335 edges), `SHARES_COMPONENT` (308 edges), `HAS_PRIORITY` (259 edges), `HAS_LABEL` (158 edges).
 
-Typed Relationships:
-- `BELONGS_TO`, `TRACKED_IN`, `HAS_COMPONENT`, `HAS_SEVERITY`, `HAS_PRIORITY`, `HAS_STATUS`, `HAS_RESOLUTION`
-
-The Knowledge Graph retriever supplies prior defect densities and co-occurrence signals to the Data Agent during auditing and injects topological priors into the downstream treatment classifier.
+The dual Knowledge Graph retriever supplies prior defect densities, cross-project component sharing, and co-occurrence signals to the Data Agent during auditing and injects topological priors into the downstream treatment classifier.
 
 ## Dashboard / Live API Inference
 

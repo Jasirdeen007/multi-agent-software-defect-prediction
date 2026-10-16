@@ -44,7 +44,23 @@ class KnowledgeGraphRetriever:
                 f"({bug_count}/{len(proj_matches)} sample issues classified as bugs)."
             )
 
-        # 2. Component-level defect prior
+        # 1b. Macro Knowledge Graph global prior (across 926k issues)
+        try:
+            from src.knowledge_graph.load_macro_kg import get_macro_kg
+            macro_kg = get_macro_kg()
+            m_proj = macro_kg.get_project_prior(project)
+            if m_proj:
+                m_rate = float(m_proj.get("bug_rate", 0)) * 100.0
+                m_total = m_proj.get("count", 0)
+                m_bugs = m_proj.get("bug_count", 0)
+                evidence.append(
+                    f"[KG Global Prior] Population-wide Knowledge Graph: Project '{project}' exhibits "
+                    f"{m_rate:.1f}% defect density ({m_bugs:,}/{m_total:,} total issues tracked)."
+                )
+        except Exception:
+            pass
+
+        # 2. Component-level defect prior & clusters
         if comp and pd.notna(comp) and str(comp).strip():
             comp_name = str(comp).strip()
             comp_matches = self.df[
@@ -58,6 +74,20 @@ class KnowledgeGraphRetriever:
                     f"[KG Component Cluster] Component '{comp_name}' exhibits {c_rate:.1f}% defect density "
                     f"({c_bugs}/{len(comp_matches)} issues are confirmed defects)."
                 )
+
+            # Query Macro KG defect clusters
+            try:
+                from src.knowledge_graph.load_macro_kg import get_macro_kg
+                macro_kg = get_macro_kg()
+                clusters = macro_kg.get_defect_clusters(comp_name)
+                if clusters:
+                    top_cluster = clusters[0]
+                    evidence.append(
+                        f"[KG Defect Cluster] Component '{comp_name}' clusters with '{top_cluster.get('component')}' "
+                        f"(Cluster avg defect density: {float(top_cluster.get('avg_bug_rate', 0))*100:.1f}%)."
+                    )
+            except Exception:
+                pass
 
         # 3. Source-level Severity / Priority co-occurrence
         if sev and pd.notna(sev) and str(sev).strip():

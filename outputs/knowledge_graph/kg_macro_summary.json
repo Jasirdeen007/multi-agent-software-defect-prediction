@@ -1,0 +1,22 @@
+{
+  "source_file": "data\\knowledge_graph\\kg_macro_triples.csv",
+  "total_nodes": 608,
+  "total_edges": 5000,
+  "projects_count": 78,
+  "components_count": 478,
+  "sources_count": 3,
+  "priorities_count": 23,
+  "relationship_distribution": {
+    "CONTAINS": 82,
+    "PRODUCES": 3,
+    "HOSTED_ON": 79,
+    "HAS_LABEL": 158,
+    "HAS_COMPONENT": 704,
+    "HAS_PRIORITY": 259,
+    "SHARES_COMPONENT": 308,
+    "CROSS_SOURCE_PATTERN": 335,
+    "AFFECTS": 53,
+    "DEFECT_CLUSTER": 991,
+    "CO_OCCURS_WITH": 2028
+  }
+}
