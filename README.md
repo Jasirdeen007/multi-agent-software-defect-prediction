@@ -12,6 +12,93 @@ Multi-agent audited labels
 
 Original labels are the BugHub source labels. They are not human gold labels.
 
+## End-to-End System Architecture
+
+```text
+192,502 CLEAN GITBUGS ISSUES
+             │
+             ▼
+     CANONICAL PARQUET (merged dataset)
+             │
+             ▼
+     HEURISTIC LABELING
+             │
+             ├── heuristic_label
+             └── heuristic_rule
+             │
+             ▼
+        AGENT TRIAGE
+             │
+     ┌───────┼────────┐
+     ▼       ▼        ▼
+  Semantic  Structural  Skeptic
+  Auditor    + KG      Auditor
+     └───────┼────────┘
+             ▼
+           Judge
+             │
+             ▼
+     HUMAN REVIEW WHEN NEEDED (human-in-the-loop fallback on low confidence)
+             │
+             ▼
+     AUDITED SILVER LABEL (output from judge agent)
+             │
+             ▼
+       ┌───────────────┐
+       │               │
+       ▼               ▼
+   BASELINE        AGENTTRIAGE
+ heuristic label  audited label
+       │               │
+       ▼               ▼
+   DeBERTa-v3      DeBERTa-v3 (LoRA)
+       │               │
+       ▼               ▼
+    XGBoost          XGBoost (+ KG Priors)
+       │               │
+       ▼               ▼
+ DEFECT/NON-DEFECT DEFECT/NON-DEFECT
+```
+
+```mermaid
+flowchart TD
+    A["192,502 Clean GitBugs Issues<br/>(BugHub / Canonical Source)"] --> B["Canonical Parquet<br/>(bughubs_canonical.parquet)"]
+    
+    B --> C["Heuristic / Source Labeling"]
+    C --> C1["heuristic_label"]
+    C --> C2["heuristic_rule"]
+    
+    C1 --> D["AGENT TRIAGE COUNCIL"]
+    
+    subgraph Council ["Multi-Agent Council"]
+        E1["Semantic Auditor<br/>(Policy Agent - Text Semantics & Descriptions)"]
+        E2["Structural + KG Auditor<br/>(Data Agent - Knowledge Graph Topology & Metadata)"]
+        E3["Skeptic Auditor<br/>(Pattern Agent - Adversarial Check & Defect Priors)"]
+        
+        E1 & E2 & E3 --> F["Judge Agent<br/>(Confidence Aggregation & Disagreement Resolution)"]
+    end
+    
+    D --> E1 & E2 & E3
+    
+    F --> G{"Confidence >= Threshold?"}
+    G -- "No (Low Confidence / Disagreement)" --> H["Human Review When Needed<br/>(Active Human-in-the-Loop)"]
+    G -- "Yes" --> I["Audited Silver Label<br/>(Judge Audited Output)"]
+    H --> I
+    
+    C1 --> BASELINE["BASELINE TRACK<br/>(Heuristic / Source Label)"]
+    I --> TREATMENT["AGENTTRIAGE TRACK<br/>(Audited Silver Label)"]
+    
+    subgraph Models ["Comparative Defect Prediction Models"]
+        BASELINE --> B_DEBERTA["DeBERTa-v3 Feature Encoder"]
+        B_DEBERTA --> B_XGB["Regularized XGBoost Classifier"]
+        B_XGB --> B_OUT["Defect / Non-Defect<br/>(Acc: 78.52%, AUC: 0.8301)"]
+        
+        TREATMENT --> T_DEBERTA["DeBERTa-v3 (LoRA Fine-Tuned) + KG Priors"]
+        T_DEBERTA --> T_XGB["Regularized XGBoost Classifier (Anti-Overfitting)"]
+        T_XGB --> T_OUT["Defect / Non-Defect<br/>(Acc: 85.73%, AUC: 0.9138)"]
+    end
+```
+
 ## Current Status
 
 Completed:
