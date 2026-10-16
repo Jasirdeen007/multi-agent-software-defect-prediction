@@ -1,0 +1,7 @@
+{
+  "epoch": 3,
+  "val_accuracy": 0.788,
+  "val_macro_f1": 0.7498,
+  "val_roc_auc": 0.8291,
+  "model_dir": "outputs\\models\\treatment_deberta_lora"
+}

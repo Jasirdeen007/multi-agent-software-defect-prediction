@@ -1,0 +1,23 @@
+{
+  "total_nodes": 5845,
+  "total_edges": 24651,
+  "node_distribution": {
+    "Issue": 5000,
+    "Project": 79,
+    "Source": 3,
+    "Status": 2,
+    "Component": 727,
+    "Severity": 13,
+    "Priority": 20,
+    "Resolution": 1
+  },
+  "edge_distribution": {
+    "BELONGS_TO": 5000,
+    "TRACKED_IN": 5000,
+    "HAS_STATUS": 5000,
+    "HAS_COMPONENT": 2527,
+    "HAS_SEVERITY": 1375,
+    "HAS_PRIORITY": 2874,
+    "HAS_RESOLUTION": 2875
+  }
+}

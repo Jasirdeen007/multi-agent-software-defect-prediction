@@ -18,7 +18,7 @@ class BaseAuditAgent:
         model: str = "qwen/qwen3.8-27b",
         fallback_model: str = "openai/gpt-oss-20b",
         temperature: float = 0.1,
-        max_retries: int = 3,
+        max_retries: int = 6,
     ):
         self.name = name
         self.model = model

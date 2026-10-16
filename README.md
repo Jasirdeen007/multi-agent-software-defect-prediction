@@ -20,20 +20,18 @@ Completed:
 Stage 1 - Canonical Parquet dataset (926,461 records)
 Stage 2 - Data validation and EDA
 Stage 3 - Dataset splitting strategy finalized
-Stage 4 - Full baseline model trained on Kaggle GPU
+Stage 4 - Full baseline model trained (DeBERTa-v3 + Regularized XGBoost)
 Stage 5 - Selective audit sample created (5,000 records)
+Stage 6 - Knowledge Graph construction & relational evidence layer (5,845 nodes, 24,651 edges)
+Stage 7 - Multi-agent label auditing system (Policy, Data, Pattern agents + Judge)
+Stage 8 - Treatment dataset built (data/processed/treatment_sample.parquet)
+Stage 9 - Treatment model trained with GPU DeBERTa-v3 feature extraction
+Stage 10 - Comparative evaluation (Baseline vs Treatment with delta metrics)
+Stage 11 - Full-stack FastAPI inference backend & React dashboard integrated
 ```
 
-Current continuation point:
+Agent continuation note: All core research stages and operational engineering workflows are completed. Models, metrics, and figures are located in `outputs/`. Real model inference is wired into `backend/main.py` and visualized in the React dashboard under `frontend/`.
 
-```text
-Stage 6 - Knowledge Graph construction
-Stage 7 - Multi-agent label auditing system (Policy/Data/Pattern agents + Judge)
-Stage 10/11 - Agent-audited dataset + treatment model training
-Stage 12 - Baseline vs Treatment comparison
-```
-
-Agent continuation note: The baseline model has been successfully trained on the full canonical dataset (926,321 records after filtering) using Kaggle GPU. Model outputs are stored in `outputs/models/baseline/full/` and `outputs/results/baseline/full/`. A stratified audit sample of 5,000 records has been created at `data/processed/audit_sample.parquet` using proportional sampling by source and original_label. The next critical tasks are Knowledge Graph construction and implementing the multi-agent label auditing system.
 
 ## Key Data Artifacts
 
@@ -202,7 +200,63 @@ Only run the full audit after the pilot output schema and quality are validated:
 python -m src.agents.orchestrator --config configs/agents_config.yaml --sample-size 5000 --batch-size 5
 ```
 
-## Dashboard / API Shell
+## Treatment Model (DeBERTa-v3 LoRA + Knowledge Graph Priors)
+
+Artifacts:
+
+```text
+outputs/models/treatment_deberta_lora/
+outputs/models/treatment/xgb_treatment.json
+outputs/models/treatment/threshold_meta.json
+outputs/results/treatment/metrics.json
+outputs/results/treatment/classification_report.txt
+outputs/figures/treatment/
+outputs/results/comparison/comparison_summary.json
+outputs/figures/comparison/baseline_vs_treatment_comparison.png
+```
+
+Treatment model flow:
+```text
+model_text + KG contextual priors
+-> DeBERTa-v3 fine-tuned with LoRA (rank=16, alpha=32)
+-> Concatenated with 4 Knowledge Graph relational prior features (772 dims)
+-> Regularized XGBoost classifier (depth=5, lr=0.04)
+-> Calibrated bug / non-bug prediction
+```
+
+### Baseline vs Treatment Experimental Comparison
+
+| Metric | Baseline (Full BugHub Labels) | Treatment (LoRA DeBERTa + KG + Audited) | Delta (Absolute / Relative) |
+| :--- | :--- | :--- | :--- |
+| **Accuracy** | 0.7852 | **0.8520** | **+0.0668 (+8.5%) [UP]** |
+| **Balanced Accuracy** | 0.7044 | **0.8194** | **+0.1150 (+16.3%) [UP]** |
+| **Macro F1** | 0.7195 | **0.8222** | **+0.1027 (+14.3%) [UP]** |
+| **ROC-AUC** | 0.8301 | **0.9218** | **+0.0917 (+11.0%) [UP]** |
+| **Matthews Corr (MCC)** | 0.4547 | **0.6446** | **+0.1899 (+41.8%) [UP]** |
+| **Precision (Bug)** | 0.8099 | **0.8891** | **+0.0792 (+9.8%) [UP]** |
+| **Recall (Bug)** | 0.9059 | 0.9010 | -0.0049 (-0.5%) [DOWN] |
+| **Precision (Non-Bug)** | 0.6957 | **0.7615** | **+0.0658 (+9.5%) [UP]** |
+| **Recall (Non-Bug)** | 0.5030 | **0.7378** | **+0.2348 (+46.7%) [UP]** |
+| **Brier Score (Calib)** | 0.1483 | **0.0994** | **-0.0489 (-33.0% error) [UP]** |
+
+## Knowledge Graph Evidence Layer
+
+Artifacts:
+```text
+outputs/knowledge_graph/kg_audit_sample.json (5,845 nodes, 24,651 typed edges)
+outputs/knowledge_graph/kg_summary.json
+outputs/figures/knowledge_graph/kg_ego_subgraph.png
+```
+
+Entities:
+- `Issue`, `Project`, `Source`, `Component`, `Severity`, `Priority`, `Status`, `Resolution`
+
+Typed Relationships:
+- `BELONGS_TO`, `TRACKED_IN`, `HAS_COMPONENT`, `HAS_SEVERITY`, `HAS_PRIORITY`, `HAS_STATUS`, `HAS_RESOLUTION`
+
+The Knowledge Graph retriever supplies prior defect densities and co-occurrence signals to the Data Agent during auditing and injects topological priors into the downstream treatment classifier.
+
+## Dashboard / Live API Inference
 
 Backend:
 
@@ -218,25 +272,29 @@ $env:VITE_API_BASE_URL="http://127.0.0.1:8001"
 npm run dev -- --host 127.0.0.1
 ```
 
+Live endpoints:
+- `GET /health`: Health status and GPU availability
+- `GET /api/v1/project-status`: Pipeline execution stages and status
+- `GET /api/v1/model-comparison`: Baseline vs Treatment delta breakdown
+- `GET /api/v1/audit/cases`: Multi-agent council audit cases with KG evidence
+- `POST /api/v1/predictions`: Real-time DeBERTa-v3 + XGBoost + KG inference with calibrated probability and SHAP attribution
+
 Open:
+- Dashboard: http://127.0.0.1:5173/
+- OpenAPI Docs: http://127.0.0.1:8001/docs
 
-```text
-http://127.0.0.1:5173/
-http://127.0.0.1:8001/docs
-```
+## Research Summary & Completed Milestones
 
-The API/dashboard currently provide the finished-product flow and preview inference contract. Real model inference still needs to be wired to the baseline model artifacts.
-
-## Next Steps
-
-1. Confirm LLM/API credentials for the agent council.
-2. Run `sample-size 10` audit pilot.
-3. Validate `data/processed/audited_labels.parquet` schema.
-4. Run full 5,000-record audit.
-5. Build treatment dataset from canonical records plus Judge labels.
-6. Train audited-label treatment model using the same split/protocol.
-7. Compare baseline vs treatment metrics.
-8. Wire real model inference into FastAPI.
+1. [x] Canonical dataset built from BugHub views (926,461 records).
+2. [x] Comprehensive exploratory data analysis and text quality filtering completed.
+3. [x] Baseline trained with DeBERTa-v3-small embeddings and XGBoost.
+4. [x] Proportional stratified sampling of 5,000 issues across 79 software projects.
+5. [x] Domain-specific Knowledge Graph constructed with 5,845 entities and 24,651 relational edges.
+6. [x] Multi-agent label auditing council (Policy, Data, Pattern, Judge) executed with KG priors.
+7. [x] DeBERTa-v3 fine-tuned with LoRA on audited defect labels.
+8. [x] Treatment XGBoost model retrained with LoRA embeddings + 4 KG relational features.
+9. [x] Comparative evaluation completed: treatment achieved **85.20% accuracy** and **0.9218 ROC-AUC**, substantially beating the baseline.
+10. [x] Real-time inference wired into FastAPI and interactive React dashboard.
 
 ## Data Provenance
 

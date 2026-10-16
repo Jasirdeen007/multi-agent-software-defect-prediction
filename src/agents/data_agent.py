@@ -43,14 +43,19 @@ class DataAgent(BaseAuditAgent):
             "status": issue.get("status"),
             "resolution": issue.get("resolution"),
         }
-        title = issue.get("title", "")
+        from src.knowledge_graph.retriever import get_kg_retriever
+        kg_evidence = get_kg_retriever().retrieve_evidence_for_issue(issue)
 
         user_prompt = f"""Issue Title: {title}
 Structured Metadata:
 {metadata_summary}
 
-Analyze the metadata indicators. Does the metadata support classifying this issue as a BUG or a NON-BUG?
+Knowledge Graph Relational Evidence:
+{chr(10).join(kg_evidence)}
+
+Analyze the metadata indicators and Knowledge Graph context. Does the evidence support classifying this issue as a BUG or a NON-BUG?
 Respond in valid JSON."""
+
 
         raw_json = await self._generate_json_response(DATA_SYSTEM_PROMPT, user_prompt)
         

@@ -27,10 +27,11 @@ class MultiAgentAuditOrchestrator:
         llm_cfg = self.config["llm"]
         self.rate_limit_delay = float(llm_cfg.get("rate_limit_delay_seconds", 1.5))
 
-        self.policy_agent = PolicyAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"))
-        self.data_agent = DataAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"))
-        self.pattern_agent = PatternAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"))
-        self.judge_agent = JudgeAgent(model=llm_cfg.get("judge_model", "openai/gpt-oss-120b"))
+        retries = int(llm_cfg.get("max_retries", 6))
+        self.policy_agent = PolicyAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
+        self.data_agent = DataAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
+        self.pattern_agent = PatternAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
+        self.judge_agent = JudgeAgent(model=llm_cfg.get("judge_model", "openai/gpt-oss-120b"), max_retries=retries)
 
     async def audit_single_issue(self, issue: dict[str, Any]) -> AuditedIssueRecord:
         """Runs the 3 specialized agents concurrently, then arbitrates via the Judge."""
@@ -135,11 +136,23 @@ async def main():
     ]
     df = pd.read_parquet(dataset_path, columns=cols)
 
+    # Filter out already audited issues
+    parquet_out = Path(orchestrator.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"))
+    if parquet_out.exists():
+        try:
+            audited_existing = pd.read_parquet(parquet_out, columns=["source", "project", "issue_id"])
+            existing_keys = set(zip(audited_existing["source"], audited_existing["project"], audited_existing["issue_id"].astype(str)))
+            df = df[~df.apply(lambda row: (row["source"], row["project"], str(row["issue_id"])) in existing_keys, axis=1)]
+            print(f"Skipping {len(existing_keys)} already-audited records. Remaining candidate pool: {len(df)}")
+        except Exception as e:
+            print(f"[Info] Note on existing audited parquet: {e}")
+
     # Sample issues
     if args.sample_size and args.sample_size < len(df):
         df_sample = df.sample(n=args.sample_size, random_state=args.random_seed)
     else:
         df_sample = df
+
 
     issues = df_sample.to_dict(orient="records")
     results = await orchestrator.run_batch_audit(issues, batch_size=args.batch_size)
