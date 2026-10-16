@@ -14,52 +14,6 @@ Original labels are the BugHub source labels. They are not human gold labels.
 
 ## End-to-End System Architecture
 
-```text
-192,502 CLEAN GITBUGS ISSUES
-             │
-             ▼
-     CANONICAL PARQUET (merged dataset)
-             │
-             ▼
-     HEURISTIC LABELING
-             │
-             ├── heuristic_label
-             └── heuristic_rule
-             │
-             ▼
-        AGENT TRIAGE
-             │
-     ┌───────┼────────┐
-     ▼       ▼        ▼
-  Semantic  Structural  Skeptic
-  Auditor    + KG      Auditor
-     └───────┼────────┘
-             ▼
-           Judge
-             │
-             ▼
-     HUMAN REVIEW WHEN NEEDED (human-in-the-loop fallback on low confidence)
-             │
-             ▼
-     AUDITED SILVER LABEL (output from judge agent)
-             │
-             ▼
-       ┌───────────────┐
-       │               │
-       ▼               ▼
-   BASELINE        AGENTTRIAGE
- heuristic label  audited label
-       │               │
-       ▼               ▼
-   DeBERTa-v3      DeBERTa-v3 (LoRA)
-       │               │
-       ▼               ▼
-    XGBoost          XGBoost (+ KG Priors)
-       │               │
-       ▼               ▼
- DEFECT/NON-DEFECT DEFECT/NON-DEFECT
-```
-
 ```mermaid
 flowchart TD
     A["192,502 Clean GitBugs Issues<br/>(BugHub / Canonical Source)"] --> B["Canonical Parquet<br/>(bughubs_canonical.parquet)"]
