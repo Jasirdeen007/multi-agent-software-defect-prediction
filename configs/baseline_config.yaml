@@ -19,10 +19,11 @@ data:
   label_map:
     bug: 1
     non-bug: 0
-  sample_size: 50000
+  sample_size: null
   test_size: 0.15
   val_size: 0.15
   random_seed: 42
+  split_dir: "data/processed/fixed_splits"
   stratify_column: "original_label"
 
 xgboost:
@@ -47,6 +48,6 @@ shap:
 
 output:
   embeddings_dir: "data/embeddings"
-  model_dir: "outputs/models/baseline"
-  results_dir: "outputs/results/baseline"
-  figures_dir: "outputs/figures/baseline"
+  model_dir: "outputs/models/baseline/full"
+  results_dir: "outputs/results/baseline/full"
+  figures_dir: "outputs/figures/baseline/full"

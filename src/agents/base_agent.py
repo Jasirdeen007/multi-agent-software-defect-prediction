@@ -10,7 +10,7 @@ from groq import AsyncGroq, Groq
 load_dotenv()
 
 class BaseAuditAgent:
-    """Base class providing async Groq API interaction with exponential backoff and JSON validation."""
+    """Base class providing async Groq API interaction with retry and token accounting."""
 
     def __init__(
         self,
@@ -31,6 +31,9 @@ class BaseAuditAgent:
             raise ValueError("GROQ_API_KEY not found in environment. Please set it in your .env file.")
 
         self.client = AsyncGroq(api_key=api_key)
+        self.prompt_tokens = 0
+        self.completion_tokens = 0
+        self.usage_by_model: dict[str, dict[str, int]] = {}
 
     async def _generate_json_response(self, system_prompt: str, user_prompt: str) -> dict[str, Any]:
         """Calls Groq with strict JSON output mode and exponential backoff retry logic."""
@@ -52,6 +55,15 @@ class BaseAuditAgent:
                     response_format={"type": "json_object"},
                     max_tokens=512,
                 )
+                usage = getattr(response, "usage", None)
+                if usage is not None:
+                    prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
+                    completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
+                    self.prompt_tokens += prompt_tokens
+                    self.completion_tokens += completion_tokens
+                    model_usage = self.usage_by_model.setdefault(current_model, {"prompt_tokens": 0, "completion_tokens": 0})
+                    model_usage["prompt_tokens"] += prompt_tokens
+                    model_usage["completion_tokens"] += completion_tokens
                 raw_text = response.choices[0].message.content.strip()
                 parsed = json.loads(raw_text)
                 return parsed

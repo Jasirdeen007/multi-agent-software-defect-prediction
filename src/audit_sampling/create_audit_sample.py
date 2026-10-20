@@ -16,10 +16,10 @@ import numpy as np
 import pandas as pd
 
 
-DEFAULT_DATASET = Path("data/processed/bughubs_canonical.parquet")
-DEFAULT_SAMPLE = Path("data/processed/audit_sample.parquet")
-DEFAULT_SUMMARY = Path("outputs/results/audit_sampling/audit_sample_summary.json")
-DEFAULT_IDS = Path("outputs/results/audit_sampling/audit_sample_ids.csv")
+DEFAULT_DATASET = Path("data/processed/fixed_splits/train.parquet")
+DEFAULT_SAMPLE = Path("data/processed/audit_train_sample.parquet")
+DEFAULT_SUMMARY = Path("outputs/results/audit_sampling/audit_train_sample_summary.json")
+DEFAULT_IDS = Path("outputs/results/audit_sampling/audit_train_sample_ids.csv")
 DEFAULT_SAMPLE_SIZE = 5_000
 DEFAULT_RANDOM_SEED = 42
 
@@ -41,14 +41,21 @@ CANONICAL_COLUMNS = [
     "model_text",
 ]
 IDENTITY_COLUMNS = ["source", "project", "issue_id"]
-STRATA_COLUMNS = ["source", "original_label"]
+STRATA_COLUMNS = ["project", "original_label"]
 METADATA_COLUMNS = ["component", "severity", "priority", "status", "resolution", "created_at", "updated_at"]
 
 
 def load_dataset(path: Path) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Canonical dataset not found: {path}")
-    df = pd.read_parquet(path, columns=CANONICAL_COLUMNS)
+    import pyarrow.parquet as pq
+    available = set(pq.read_schema(path).names)
+    optional_signals = [
+        "agent_disagreement", "judge_confidence",
+        "policy_label", "data_label", "pattern_label",
+    ]
+    columns = CANONICAL_COLUMNS + [column for column in optional_signals if column in available]
+    df = pd.read_parquet(path, columns=columns)
     missing = [column for column in CANONICAL_COLUMNS if column not in df.columns]
     if missing:
         raise ValueError(f"Missing required canonical columns: {missing}")
@@ -75,22 +82,56 @@ def create_sample(df: pd.DataFrame, sample_size: int, random_seed: int) -> pd.Da
     if df[IDENTITY_COLUMNS].isna().any().any():
         raise ValueError("Canonical dataset contains missing identity values.")
 
-    strata_counts = df.groupby(STRATA_COLUMNS, dropna=False).size()
-    sample_counts = assign_sample_counts(strata_counts, sample_size)
+    # Allocate by sqrt(project population): every project is represented while
+    # large projects receive less than their population-proportional share.
+    project_counts = df.groupby("project", dropna=False).size()
+    if sample_size < len(project_counts):
+        raise ValueError("sample_size must be at least the number of projects for project coverage.")
+    weights = np.sqrt(project_counts.astype(float))
+    raw = weights / weights.sum() * sample_size
+    project_quota = np.floor(raw).astype(int).clip(lower=1)
+    while int(project_quota.sum()) > sample_size:
+        candidates = project_quota[project_quota > 1]
+        project_quota.loc[candidates.index[np.argmin((raw.loc[candidates.index] - candidates).to_numpy())]] -= 1
+    while int(project_quota.sum()) < sample_size:
+        candidates = project_quota[project_quota < project_counts]
+        if candidates.empty:
+            raise ValueError("Requested sample exceeds available training records.")
+        project_quota.loc[candidates.index[np.argmax((raw.loc[candidates.index] - candidates).to_numpy())]] += 1
 
     pieces: list[pd.DataFrame] = []
-    for stratum, count in sample_counts.items():
-        source, label = stratum
-        stratum_df = df[(df["source"] == source) & (df["original_label"] == label)]
-        if count > len(stratum_df):
-            raise ValueError(f"Requested {count} rows from stratum {stratum}, but only {len(stratum_df)} exist.")
-        pieces.append(stratum_df.sample(n=count, random_state=random_seed))
+    for project, project_n in project_quota.items():
+        project_df = df[df["project"] == project]
+        label_counts = project_df.groupby("original_label", dropna=False).size()
+        label_quota = assign_sample_counts(label_counts, int(project_n))
+        for label, count in label_quota.items():
+            stratum_df = project_df[project_df["original_label"] == label].copy()
+            if count > len(stratum_df):
+                raise ValueError(f"Requested {count} rows from {project}|{label}, only {len(stratum_df)} exist.")
+            # If candidate triage signals exist, prioritize disagreement and
+            # uncertainty within each project/class quota; otherwise sample randomly.
+            score = pd.Series(0.0, index=stratum_df.index)
+            if "agent_disagreement" in stratum_df:
+                score += pd.to_numeric(stratum_df["agent_disagreement"], errors="coerce").fillna(0)
+            elif {"policy_label", "data_label", "pattern_label"}.issubset(stratum_df.columns):
+                agent_labels = stratum_df[["policy_label", "data_label", "pattern_label"]].astype("string")
+                score += agent_labels.nunique(axis=1).sub(1).div(2).fillna(0)
+            if "judge_confidence" in stratum_df:
+                confidence = pd.to_numeric(stratum_df["judge_confidence"], errors="coerce")
+                score += 1.0 - confidence.fillna(1.0)
+            stratum_df["_priority"] = score
+            if score.any():
+                selected = stratum_df.sort_values("_priority", ascending=False, kind="stable").head(count)
+                selected = selected.sample(frac=1.0, random_state=random_seed)
+            else:
+                selected = stratum_df.sample(n=count, random_state=random_seed)
+            pieces.append(selected.drop(columns=["_priority"], errors="ignore"))
 
     sample = pd.concat(pieces, ignore_index=True)
     sample = sample.sample(frac=1.0, random_state=random_seed).reset_index(drop=True)
-    sample["sampling_method"] = "proportional_stratified_source_original_label"
+    sample["sampling_method"] = "sqrt_project_weighted_stratified_original_label"
     sample["sampling_seed"] = random_seed
-    sample["sampling_stratum"] = sample["source"].astype(str) + "|" + sample["original_label"].astype(str)
+    sample["sampling_stratum"] = sample["project"].astype(str) + "|" + sample["original_label"].astype(str)
     return sample
 
 
@@ -137,7 +178,7 @@ def build_summary(df: pd.DataFrame, sample: pd.DataFrame, dataset_path: Path, sa
         "created_at": datetime.now(timezone.utc).isoformat(),
         "dataset_path": dataset_path.as_posix(),
         "sample_path": sample_path.as_posix(),
-        "sampling_method": "proportional_stratified_source_original_label",
+        "sampling_method": "sqrt_project_weighted_stratified_original_label",
         "sample_size_requested": sample_size,
         "sample_size_actual": int(len(sample)),
         "random_seed": random_seed,
@@ -186,7 +227,7 @@ def write_outputs(sample: pd.DataFrame, summary: dict[str, Any], sample_path: Pa
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Create representative audit sample from canonical Parquet data.")
+    parser = argparse.ArgumentParser(description="Create representative audit sample from fixed training split only.")
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
     parser.add_argument("--sample-output", type=Path, default=DEFAULT_SAMPLE)
     parser.add_argument("--summary-output", type=Path, default=DEFAULT_SUMMARY)

@@ -16,62 +16,35 @@ Original labels are the BugHub source labels. They are not human gold labels.
 
 ```mermaid
 flowchart TD
-    A["192,502 Clean GitBugs Issues<br/>(BugHub / Canonical Source)"] --> B["Canonical Parquet<br/>(bughubs_canonical.parquet)"]
-    
-    B --> C["Heuristic / Source Labeling"]
-    C --> C1["heuristic_label"]
-    C --> C2["heuristic_rule"]
-    
-    C1 --> D["AGENT TRIAGE COUNCIL"]
-    
-    subgraph Council ["Multi-Agent Council"]
-        E1["Semantic Auditor<br/>(Policy Agent - Text Semantics & Descriptions)"]
-        E2["Structural + KG Auditor<br/>(Data Agent - Knowledge Graph Topology & Metadata)"]
-        E3["Skeptic Auditor<br/>(Pattern Agent - Adversarial Check & Defect Priors)"]
-        
-        E1 & E2 & E3 --> F["Judge Agent<br/>(Confidence Aggregation & Disagreement Resolution)"]
-    end
-    
-    D --> E1 & E2 & E3
-    
-    F --> G{"Confidence >= Threshold?"}
-    G -- "No (Low Confidence / Disagreement)" --> H["Human Review When Needed<br/>(Active Human-in-the-Loop)"]
-    G -- "Yes" --> I["Audited Silver Label<br/>(Judge Audited Output)"]
-    H --> I
-    
-    C1 --> BASELINE["BASELINE TRACK<br/>(Heuristic / Source Label)"]
-    I --> TREATMENT["AGENTTRIAGE TRACK<br/>(Audited Silver Label)"]
-    
-    subgraph Models ["Comparative Defect Prediction Models"]
-        BASELINE --> B_DEBERTA["DeBERTa-v3 Feature Encoder"]
-        B_DEBERTA --> B_XGB["Regularized XGBoost Classifier"]
-        B_XGB --> B_OUT["Defect / Non-Defect<br/>(Acc: 78.52%, AUC: 0.8301)"]
-        
-        TREATMENT --> T_DEBERTA["DeBERTa-v3 (LoRA Fine-Tuned) + KG Priors"]
-        T_DEBERTA --> T_XGB["Regularized XGBoost Classifier (Anti-Overfitting)"]
-        T_XGB --> T_OUT["Defect / Non-Defect<br/>(Acc: 85.73%, AUC: 0.9138)"]
-    end
+    A["Canonical dataset"] --> B["Freeze shared train / validation / test split"]
+    B --> C["Select 5,000 audit candidates from train only"]
+    C --> D["Policy + Data + Pattern agents, then Judge"]
+    D --> E["Treatment training labels: Judge where audited; original elsewhere"]
+    B --> F["Baseline trains on original train labels"]
+    E --> G["Treatment trains on same train rows and features"]
+    F --> H["Evaluate on same untouched test set"]
+    G --> H
 ```
 
 ## Current Status
 
-Completed:
+Completed or implemented:
 
 ```text
 Stage 1 - Canonical Parquet dataset (926,461 records)
 Stage 2 - Data validation and EDA
-Stage 3 - Dataset splitting strategy finalized
-Stage 4 - Full baseline model trained (DeBERTa-v3 + Regularized XGBoost)
-Stage 5 - Selective audit sample created (5,000 records)
+Stage 3 - Shared fixed split created (seed 42; 70/15/15)
+Stage 4 - Existing baseline artifacts available; shared-split runner aligned
+Stage 5 - 5,000 training-only audit candidates selected reproducibly
 Stage 6 - Knowledge Graph construction & relational evidence layer (5,845 nodes, 24,651 edges)
-Stage 7 - Multi-agent label auditing system (Policy, Data, Pattern agents + Judge)
-Stage 8 - Treatment dataset built (data/processed/treatment_sample.parquet)
-Stage 9 - Treatment model trained with GPU DeBERTa-v3 feature extraction
-Stage 10 - Comparative evaluation (Baseline vs Treatment with delta metrics)
-Stage 11 - Full-stack FastAPI inference backend & React dashboard integrated
+Stage 7 - Agent and Judge code implemented; new 5,000-case audit not yet run
+Stage 8 - Full-training treatment dataset builder implemented with train-only guard
+Stage 9 - Treatment trainer aligned to baseline encoder, XGBoost configuration, and split
+Stage 10 - Valid comparison pending a fresh audit and training run
+Stage 11 - FastAPI/React application exists; production readiness is separate work
 ```
 
-Agent continuation note: All core research stages and operational engineering workflows are completed. Models, metrics, and figures are located in `outputs/`. Real model inference is wired into `backend/main.py` and visualized in the React dashboard under `frontend/`.
+The earlier 20-record pilot and its treatment/comparison metrics are not evidence of improvement from auditing. New audit outputs use separate `*_train*` paths so pilot artifacts remain intact. The current environment did not have `GROQ_API_KEY`, so the new agent run and treatment metrics are pending.
 
 
 ## Key Data Artifacts
@@ -98,23 +71,27 @@ Full baseline training used:
 
 because 140 very short/empty `model_text` rows were filtered by the baseline loader.
 
-Selective audit sample:
+Frozen experiment split and audit sample:
 
 ```text
-data/processed/audit_sample.parquet
-outputs/results/audit_sampling/audit_sample_summary.json
-outputs/results/audit_sampling/audit_sample_ids.csv
+data/processed/fixed_splits/{train,validation,test}.parquet
+data/processed/fixed_splits/split_manifest.json
+data/processed/audit_train_sample.parquet
+outputs/results/audit_sampling/audit_train_sample_summary.json
+outputs/results/audit_sampling/audit_train_sample_ids.csv
 ```
 
 Audit sample details:
 
 ```text
-sample size: 5,000
+sample size: 5,000 from training split only
 random seed: 42
-method: proportional stratified sampling by source + original_label
+method: square-root project-weighted quotas, stratified by original_label within project
 duplicate composite identities: 0
 projects covered: 79 / 79
 ```
+
+Current fixed split: 648,424 train / 138,948 validation / 138,949 test. The test split is not sent to agents. The new agent audit output is `data/processed/audited_train_labels.parquet`; treatment training data is `data/processed/fixed_splits/treatment_train.parquet`.
 
 ## Baseline Model
 
@@ -138,7 +115,7 @@ model_text
 -> bug / non-bug prediction
 ```
 
-Baseline metrics from full run:
+Previously generated baseline artifact metrics (not yet regenerated by the new fixed-split runner):
 
 ```text
 accuracy: 0.7852
@@ -150,7 +127,7 @@ brier_score: 0.1483
 optimal_threshold: 0.52
 ```
 
-Do not confuse this with older sample/tuned artifacts. Old baseline root/smoke/tuned outputs were cleared; the relevant baseline is under `outputs/models/baseline/full/`.
+Use these as existing run outputs, not as the final paired result until both models are freshly trained through the shared split protocol below.
 
 ## Agent Audit Configuration
 
@@ -160,21 +137,21 @@ Agent council config:
 configs/agents_config.yaml
 ```
 
-It currently points to:
+It points to the selected training-only sample and separate training audit outputs:
 
 ```yaml
 audit:
-  dataset_path: "data/processed/audit_sample.parquet"
+  dataset_path: "data/processed/audit_train_sample.parquet"
   sample_size: 5000
-  output_dir: "outputs/results/audited"
-  output_parquet: "data/processed/audited_labels.parquet"
+  output_dir: "outputs/results/audited_train"
+  output_parquet: "data/processed/audited_train_labels.parquet"
 ```
 
-Old pilot audited outputs were cleared. Fresh agent audit outputs should be written to:
+The earlier pilot outputs are preserved separately. New audit outputs are written to:
 
 ```text
-outputs/results/audited/
-data/processed/audited_labels.parquet
+outputs/results/audited_train/
+data/processed/audited_train_labels.parquet
 ```
 
 ## Important Invariants
@@ -229,19 +206,25 @@ Recreate selective audit sample:
 python -m src.audit_sampling.create_audit_sample
 ```
 
-Run a small agent audit pilot:
+Prepare/reuse the fixed split, then make the 5,000-case sample from train only:
 
 ```powershell
-python -m src.agents.orchestrator --config configs/agents_config.yaml --sample-size 10 --batch-size 2
+python -m src.baseline.data_splitter --dataset data/processed/bughubs_canonical.parquet --split-dir data/processed/fixed_splits
+python -m src.audit_sampling.create_audit_sample --dataset data/processed/fixed_splits/train.parquet --sample-output data/processed/audit_train_sample.parquet --summary-output outputs/results/audit_sampling/audit_train_sample_summary.json --ids-output outputs/results/audit_sampling/audit_train_sample_ids.csv --sample-size 5000 --random-seed 42
+python -m src.baseline.run_baseline --config configs/baseline_config.yaml
 ```
 
-Only run the full audit after the pilot output schema and quality are validated:
+Run agents on that preselected sample (the CLI default audits all rows in it):
 
 ```powershell
-python -m src.agents.orchestrator --config configs/agents_config.yaml --sample-size 5000 --batch-size 5
+python -m src.agents.orchestrator --config configs/agents_config.yaml --batch-size 5
+python -m src.treatment.build_treatment_dataset
+python -m src.treatment.train_treatment_model
 ```
 
-## Treatment Model (DeBERTa-v3 LoRA + Knowledge Graph Priors)
+`GROQ_API_KEY` is required to run the audit. Token counts are written to `outputs/results/audited_train/api_usage.json`; monetary cost is only estimated if provider input/output token prices are configured in `configs/agents_config.yaml`.
+
+## Treatment Model (paired protocol)
 
 Artifacts:
 
@@ -256,30 +239,14 @@ outputs/results/comparison/comparison_summary.json
 outputs/figures/comparison/baseline_vs_treatment_comparison.png
 ```
 
-Treatment model flow:
+Baseline and treatment both use the same frozen DeBERTa-v3-small encoder, cached split embeddings, XGBoost architecture/configuration, full training identities, validation data, and untouched test identities. Only training labels differ:
 ```text
-model_text + KG contextual priors
--> DeBERTa-v3 fine-tuned with LoRA (rank=16, alpha=32)
--> Concatenated with 4 Knowledge Graph relational prior features (772 dims)
--> Strongly regularized XGBoost classifier (depth=2, alpha=10.0, lambda=30.0, gamma=3.0, min_child_weight=8.0)
--> Calibrated bug / non-bug prediction
+Baseline target: original_label on all training rows
+Treatment target: judge_label where audited; original_label otherwise
+Validation/test targets: original_label for both runs
 ```
 
-### Baseline vs Treatment Experimental Comparison (Anti-Overfitting Verified)
-
-| Metric | Baseline (Full BugHub Labels) | Treatment (LoRA DeBERTa + KG + Audited) | Delta (Absolute / Relative) |
-| :--- | :--- | :--- | :--- |
-| **Accuracy** | 0.7852 | **0.8573** | **+0.0721 (+9.2%) [UP]** |
-| **Balanced Accuracy** | 0.7044 | **0.8270** | **+0.1226 (+17.4%) [UP]** |
-| **Macro F1** | 0.7195 | **0.8291** | **+0.1096 (+15.2%) [UP]** |
-| **ROC-AUC** | 0.8301 | **0.9138** | **+0.0837 (+10.1%) [UP]** |
-| **Matthews Corr (MCC)** | 0.4547 | **0.6582** | **+0.2035 (+44.8%) [UP]** |
-| **Precision (Bug)** | 0.8099 | **0.8943** | **+0.0844 (+10.4%) [UP]** |
-| **Recall (Bug)** | 0.9059 | 0.9029 | -0.0030 (-0.3%) [DOWN] |
-| **Precision (Non-Bug)** | 0.6957 | **0.7682** | **+0.0725 (+10.4%) [UP]** |
-| **Recall (Non-Bug)** | 0.5030 | **0.7511** | **+0.2481 (+49.3%) [UP]** |
-| **Brier Score (Calib)** | 0.1483 | **0.1055** | **-0.0428 (-28.9% error) [UP]** |
-| **Overfitting Gap** | 0.0064 | **0.0281** | **Controlled at 2.8% (Train: 88.5%, Test: 85.7%)** |
+The earlier 5,000-row treatment metrics are retained as historical artifacts but are not a valid paired label-auditing comparison: only 20 rows had been audited, and that run used a different split/model feature setup. Do not cite those deltas as the effect of auditing.
 
 ## Knowledge Graph Evidence Layer
 

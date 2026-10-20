@@ -34,21 +34,27 @@ class AuditedIssueRecord(BaseModel):
     policy_label: str
     policy_confidence: float
     policy_reason: str
+    policy_evidence: list[str] = Field(default_factory=list)
     
     data_label: str
     data_confidence: float
     data_reason: str
+    data_evidence: list[str] = Field(default_factory=list)
     
     pattern_label: str
     pattern_confidence: float
     pattern_reason: str
+    pattern_evidence: list[str] = Field(default_factory=list)
     
     # Judge output
     judge_label: str
     judge_confidence: float
     judge_reasoning: str
+    judge_evidence: list[str] = Field(default_factory=list)
     agent_agreement: float
     
     # Analysis flags
     label_flipped: bool
     audit_timestamp: str
+    api_prompt_tokens: int = 0
+    api_completion_tokens: int = 0

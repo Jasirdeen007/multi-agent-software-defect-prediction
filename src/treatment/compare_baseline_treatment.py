@@ -89,6 +89,16 @@ def compare_baseline_and_treatment(
     out_dir.mkdir(parents=True, exist_ok=True)
     summary_file = out_dir / "comparison_summary.json"
     with open(summary_file, "w", encoding="utf-8") as f:
+        # Attach audit scale and actual observed API usage when available.
+        audit_metrics_path = Path("outputs/results/audited_train/audit_metrics.json")
+        audit_usage_path = Path("outputs/results/audited_train/api_usage.json")
+        treatment_summary_path = Path("outputs/results/treatment/treatment_dataset_summary.json")
+        context = {}
+        for name, path in (("audit", audit_metrics_path), ("api_usage", audit_usage_path), ("treatment_dataset", treatment_summary_path)):
+            if path.exists():
+                with open(path, "r", encoding="utf-8") as source:
+                    context[name] = json.load(source)
+        comparison_dict["experiment_context"] = context
         json.dump(comparison_dict, f, indent=2)
     print(f"\nSaved comparison summary to: {summary_file}")
 

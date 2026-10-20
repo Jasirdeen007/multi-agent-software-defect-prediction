@@ -8,15 +8,18 @@ llm:
   max_tokens: 512
   max_retries: 6
   rate_limit_delay_seconds: 2.0
+  # Optional actual vendor rates. Set every model used to enable USD estimates.
+  # pricing_usd_per_million_tokens:
+  #   "provider/model-id": {input: 0.0, output: 0.0}
 
 audit:
-  dataset_path: "data/processed/audit_sample.parquet"
+  dataset_path: "data/processed/audit_train_sample.parquet"
   sample_size: 5000
   batch_size: 5
   random_seed: 42
   checkpoint_frequency: 25
-  output_dir: "outputs/results/audited"
-  output_parquet: "data/processed/audited_labels.parquet"
+  output_dir: "outputs/results/audited_train"
+  output_parquet: "data/processed/audited_train_labels.parquet"
 
 roles:
   policy_agent:

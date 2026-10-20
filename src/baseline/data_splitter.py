@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import argparse
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +22,12 @@ def load_dataset(
     if not path.exists():
         raise FileNotFoundError(f"Dataset not found at {path.resolve()}")
 
-    columns_to_load = [text_column, label_column, "source", "project", "issue_id"]
+    columns_to_load = [
+        "issue_id", "source", "project", "title", "description", "component",
+        "severity", "priority", "status", "resolution", label_column,
+        "label_source", "created_at", "updated_at", text_column,
+    ]
+    columns_to_load = list(dict.fromkeys(columns_to_load))
     print(f"Loading columns {columns_to_load} from {path}...")
     df = pd.read_parquet(path, columns=columns_to_load)
 
@@ -44,6 +51,82 @@ def load_dataset(
 
     print(f"Loaded dataset: {len(df):,} records.")
     return df
+
+
+def load_or_create_fixed_splits(
+    dataset_path: str | Path,
+    split_dir: str | Path = "data/processed/fixed_splits",
+    label_column: str = "original_label",
+    sample_size: int | None = None,
+    test_size: float = 0.15,
+    val_size: float = 0.15,
+    random_seed: int = 42,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Create once and then reuse immutable train/validation/test Parquet splits."""
+    split_path = Path(split_dir)
+    files = [split_path / f"{part}.parquet" for part in ("train", "validation", "test")]
+    if all(path.exists() for path in files):
+        splits = [pd.read_parquet(path) for path in files]
+        validate_split_disjointness(*splits)
+        manifest_path = split_path / "split_manifest.json"
+        if manifest_path.exists():
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            if manifest["random_seed"] != random_seed:
+                raise ValueError("Requested seed differs from the frozen split manifest; use a new split directory to change it.")
+            if manifest["test_size"] != test_size or manifest["val_size"] != val_size:
+                raise ValueError("Requested split ratios differ from the frozen split manifest.")
+            for name, frame in zip(("train", "validation", "test"), splits):
+                if manifest["identity_sha256"][name] != _identity_digest(frame):
+                    raise ValueError(f"Frozen {name} split identities changed after manifest creation.")
+        else:
+            _write_split_manifest(split_path, splits, random_seed, test_size, val_size)
+        return tuple(splits)  # type: ignore[return-value]
+
+    df = load_dataset(dataset_path, sample_size=sample_size, random_seed=random_seed)
+    train, val, test = split_dataset(
+        df, label_column=label_column, test_size=test_size, val_size=val_size,
+        random_seed=random_seed,
+    )
+    # Remove derived numeric target: each experiment derives its target from its own label column.
+    for part in (train, val, test):
+        part.drop(columns=["target"], errors="ignore", inplace=True)
+    split_path.mkdir(parents=True, exist_ok=True)
+    for path, part in zip(files, (train, val, test)):
+        part.to_parquet(path, index=False)
+    _write_split_manifest(split_path, (train, val, test), random_seed, test_size, val_size)
+    validate_split_disjointness(train, val, test)
+    return train, val, test
+
+
+def _write_split_manifest(split_path: Path, splits: tuple[pd.DataFrame, ...] | list[pd.DataFrame], seed: int, test_size: float, val_size: float) -> None:
+    key = ["source", "project", "issue_id"]
+    manifest: dict[str, Any] = {
+        "random_seed": seed,
+        "test_size": test_size,
+        "val_size": val_size,
+        "train_size": len(splits[0]),
+        "validation_size_records": len(splits[1]),
+        "test_records": len(splits[2]),
+        "identity_columns": key,
+        "identity_sha256": {},
+    }
+    for name, frame in zip(("train", "validation", "test"), splits):
+        manifest["identity_sha256"][name] = _identity_digest(frame)
+    (split_path / "split_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+
+
+def _identity_digest(frame: pd.DataFrame) -> str:
+    key = ["source", "project", "issue_id"]
+    ids = frame[key].astype(str).to_csv(index=False, header=False).encode("utf-8")
+    return hashlib.sha256(ids).hexdigest()
+
+
+def validate_split_disjointness(train: pd.DataFrame, validation: pd.DataFrame, test: pd.DataFrame) -> None:
+    """Raise if issue identities overlap between frozen splits."""
+    keys = ["source", "project", "issue_id"]
+    sets = [set(map(tuple, part[keys].astype(str).itertuples(index=False, name=None))) for part in (train, validation, test)]
+    if sets[0] & sets[1] or sets[0] & sets[2] or sets[1] & sets[2]:
+        raise ValueError("Composite issue identities overlap across fixed data splits.")
 
 
 def split_dataset(
@@ -123,3 +206,13 @@ def split_dataset(
         print(f"Splits summary saved to: {summary_file}")
 
     return train_df, val_df, test_df
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create/reuse the fixed baseline-treatment split.")
+    parser.add_argument("--dataset", default="data/processed/bughubs_canonical.parquet")
+    parser.add_argument("--split-dir", default="data/processed/fixed_splits")
+    parser.add_argument("--seed", type=int, default=42)
+    args = parser.parse_args()
+    parts = load_or_create_fixed_splits(args.dataset, args.split_dir, random_seed=args.seed)
+    print("Fixed split rows:", {name: len(part) for name, part in zip(("train", "validation", "test"), parts)})

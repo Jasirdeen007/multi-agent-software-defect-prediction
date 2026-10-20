@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 from sklearn.metrics import accuracy_score
 
-from src.baseline.data_splitter import load_dataset, split_dataset
+from src.baseline.data_splitter import load_or_create_fixed_splits
 from src.baseline.embedding_extractor import DebertaEmbeddingExtractor, get_or_extract_embeddings
 from src.baseline.evaluator import (
     evaluate_predictions,
@@ -21,26 +21,21 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
     with open(config_path, "r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    # 1. Load & Split Dataset
+    # 1. Load the persisted common split. Both experiments use these same rows.
     data_cfg = cfg["data"]
-    df = load_dataset(
-        dataset_path=data_cfg["dataset_path"],
-        text_column=data_cfg["text_column"],
-        label_column=data_cfg["label_column"],
-        sample_size=data_cfg.get("sample_size"),
-        random_seed=data_cfg.get("random_seed", 42),
-    )
-
     out_cfg = cfg["output"]
-    train_df, val_df, test_df = split_dataset(
-        df=df,
+    train_df, val_df, test_df = load_or_create_fixed_splits(
+        dataset_path=data_cfg["dataset_path"],
+        split_dir=data_cfg.get("split_dir", "data/processed/fixed_splits"),
+        sample_size=data_cfg.get("sample_size"),
         label_column=data_cfg["label_column"],
-        label_map=data_cfg.get("label_map"),
         test_size=data_cfg.get("test_size", 0.15),
         val_size=data_cfg.get("val_size", 0.15),
         random_seed=data_cfg.get("random_seed", 42),
-        output_dir=out_cfg["results_dir"],
     )
+    label_map = data_cfg.get("label_map", {"bug": 1, "non-bug": 0})
+    for part in (train_df, val_df, test_df):
+        part["target"] = part[data_cfg["label_column"]].map(label_map).astype(int)
 
     # 2. Extract / Load Cached DeBERTa Embeddings
     model_cfg = cfg["model"]
