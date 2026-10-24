@@ -56,5 +56,8 @@ class AuditedIssueRecord(BaseModel):
     # Analysis flags
     label_flipped: bool
     audit_timestamp: str
+    audit_method: str = "independent_agents"
+    audit_provider: str | None = None
+    audit_model: str | None = None
     api_prompt_tokens: int = 0
     api_completion_tokens: int = 0

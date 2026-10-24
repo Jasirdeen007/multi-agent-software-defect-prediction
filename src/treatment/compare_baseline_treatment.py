@@ -34,6 +34,13 @@ def compare_baseline_and_treatment(
     with open(treat_p, "r", encoding="utf-8") as f:
         treatment = json.load(f)
 
+    baseline_test_hash = baseline.get("test_identity_sha256")
+    treatment_test_hash = treatment.get("test_identity_sha256")
+    if not baseline_test_hash or baseline_test_hash != treatment_test_hash:
+        raise ValueError("Baseline and treatment metrics do not prove use of the same fixed test identities; refusing comparison.")
+    if baseline.get("test_records") != treatment.get("test_records"):
+        raise ValueError("Baseline and treatment evaluated different test-set sizes; refusing comparison.")
+
     # Compute metric deltas
     comparison_table = []
     comparison_dict = {}
@@ -90,8 +97,8 @@ def compare_baseline_and_treatment(
     summary_file = out_dir / "comparison_summary.json"
     with open(summary_file, "w", encoding="utf-8") as f:
         # Attach audit scale and actual observed API usage when available.
-        audit_metrics_path = Path("outputs/results/audited_train/audit_metrics.json")
-        audit_usage_path = Path("outputs/results/audited_train/api_usage.json")
+        audit_metrics_path = Path("outputs/results/audited_train_1000_onecall/audit_metrics.json")
+        audit_usage_path = Path("outputs/results/audited_train_1000_onecall/api_usage.json")
         treatment_summary_path = Path("outputs/results/treatment/treatment_dataset_summary.json")
         context = {}
         for name, path in (("audit", audit_metrics_path), ("api_usage", audit_usage_path), ("treatment_dataset", treatment_summary_path)):

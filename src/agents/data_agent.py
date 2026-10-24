@@ -17,6 +17,7 @@ Key Metadata Signals:
 Instructions:
 1. Cross-reference the metadata with the issue title.
 2. Note that missing metadata (NULLs) is normal for sources like GitHub and must not be treated as corruption.
+3. Keep the reason to at most 25 words; include at most two evidence strings, each under 12 words.
 3. Output STRICT JSON adhering to this schema:
 {
   "agent": "data_agent",
@@ -34,6 +35,7 @@ class DataAgent(BaseAuditAgent):
         super().__init__(name="data_agent", model=model, **kwargs)
 
     async def evaluate(self, issue: dict[str, Any]) -> AgentVerdict:
+        title = str(issue.get("title") or "")
         metadata_summary = {
             "source": issue.get("source"),
             "project": issue.get("project"),

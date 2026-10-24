@@ -19,6 +19,8 @@ def save_audited_records(
     parq_file.parent.mkdir(parents=True, exist_ok=True)
 
     records_dict = [r.model_dump() for r in records]
+    if not records_dict:
+        raise ValueError("Refusing to write an empty audit result over existing artifacts.")
 
     # Merge with existing if present
     if json_path.exists():
@@ -34,13 +36,13 @@ def save_audited_records(
         except Exception as e:
             print(f"[Warning] Failed to merge with existing records: {e}")
 
-    # Save full JSON audit records
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(records_dict, f, indent=2)
-
-    # Convert to DataFrame and save to Parquet
     df = pd.DataFrame(records_dict)
-    df.to_parquet(parq_file, index=False)
+    temp_json = json_path.with_suffix(".json.tmp")
+    temp_parquet = parq_file.with_suffix(parq_file.suffix + ".tmp")
+    temp_json.write_text(json.dumps(records_dict, indent=2), encoding="utf-8")
+    df.to_parquet(temp_parquet, index=False)
+    temp_json.replace(json_path)
+    temp_parquet.replace(parq_file)
 
     print(f"--> Saved {len(records_dict)} total audited records to:")
     print(f"    JSON:    {json_path}")

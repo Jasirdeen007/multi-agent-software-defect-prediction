@@ -135,6 +135,43 @@ def create_sample(df: pd.DataFrame, sample_size: int, random_seed: int) -> pd.Da
     return sample
 
 
+def include_required_identities(
+    sample: pd.DataFrame,
+    population: pd.DataFrame,
+    required_keys: set[tuple[str, str, str]],
+    random_seed: int,
+) -> pd.DataFrame:
+    """Include existing audit identities while preserving every project/label quota."""
+    required = population[
+        population[IDENTITY_COLUMNS].astype(str).apply(tuple, axis=1).isin(required_keys)
+    ].copy()
+    found = set(map(tuple, required[IDENTITY_COLUMNS].astype(str).itertuples(index=False, name=None)))
+    if found != required_keys:
+        raise ValueError(f"{len(required_keys - found)} requested preserved audit identity(ies) are not in the sample population.")
+
+    sample = sample.copy()
+    selected = set(map(tuple, sample[IDENTITY_COLUMNS].astype(str).itertuples(index=False, name=None)))
+    missing = required[~required[IDENTITY_COLUMNS].astype(str).apply(tuple, axis=1).isin(selected)]
+    for offset, (_, row) in enumerate(missing.iterrows()):
+        same_stratum = (sample["project"].astype(str) == str(row["project"])) & (
+            sample["original_label"].astype(str) == str(row["original_label"])
+        )
+        removable = sample.loc[same_stratum]
+        removable_keys = set(map(tuple, removable[IDENTITY_COLUMNS].astype(str).itertuples(index=False, name=None)))
+        removable = removable[
+            removable[IDENTITY_COLUMNS].astype(str).apply(tuple, axis=1).map(lambda key: key not in required_keys)
+        ]
+        if removable.empty:
+            raise ValueError(f"Cannot preserve required audit identity in stratum {row['project']}|{row['original_label']}.")
+        drop_index = removable.sample(n=1, random_state=random_seed + offset).index[0]
+        sample = sample.drop(index=drop_index)
+        sample = pd.concat([sample, row.to_frame().T], ignore_index=True)
+
+    if len(sample) != len(selected) or sample.duplicated(IDENTITY_COLUMNS).any():
+        raise ValueError("Preserving existing audits changed sample size or introduced duplicate identities.")
+    return sample.reset_index(drop=True)
+
+
 def distribution(df: pd.DataFrame, columns: list[str]) -> list[dict[str, Any]]:
     rows = (
         df.groupby(columns, dropna=False, observed=False)
@@ -234,6 +271,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ids-output", type=Path, default=DEFAULT_IDS)
     parser.add_argument("--sample-size", type=int, default=DEFAULT_SAMPLE_SIZE)
     parser.add_argument("--random-seed", type=int, default=DEFAULT_RANDOM_SEED)
+    parser.add_argument("--preserve-audited-json", type=Path, action="append", default=[])
     return parser.parse_args()
 
 
@@ -241,6 +279,12 @@ def main() -> None:
     args = parse_args()
     df = load_dataset(args.dataset)
     sample = create_sample(df, args.sample_size, args.random_seed)
+    if args.preserve_audited_json:
+        required_keys: set[tuple[str, str, str]] = set()
+        for path in args.preserve_audited_json:
+            records = json.loads(path.read_text(encoding="utf-8"))
+            required_keys.update((str(row["source"]), str(row["project"]), str(row["issue_id"])) for row in records)
+        sample = include_required_identities(sample, df, required_keys, args.random_seed)
     summary = build_summary(df, sample, args.dataset, args.sample_output, args.sample_size, args.random_seed)
     write_outputs(sample, summary, args.sample_output, args.summary_output, args.ids_output)
 

@@ -14,6 +14,7 @@ Standard Definitions:
 Instructions:
 1. Examine the issue title and description objectively.
 2. Focus strictly on whether the text describes an observed malfunction vs an enhancement.
+3. Keep the reason to at most 25 words; include at most two evidence strings, each under 12 words.
 3. Output STRICT JSON adhering to this schema:
 {
   "agent": "policy_agent",

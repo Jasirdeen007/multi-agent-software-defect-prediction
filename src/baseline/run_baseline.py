@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 from pathlib import Path
 import yaml
 from sklearn.metrics import accuracy_score
@@ -98,7 +99,8 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
     )
 
     classifier.fit(X_train, y_train, X_val, y_val)
-    classifier.save_model(Path(out_cfg["model_dir"]) / "xgb_baseline.json")
+    model_path = Path(out_cfg["model_dir"]) / "xgb_baseline.json"
+    classifier.save_model(model_path)
 
     # Log Overfitting Diagnostics
     y_train_pred = classifier.predict(X_train)
@@ -114,6 +116,11 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
     eval_results["metrics"]["train_accuracy"] = round(float(train_acc), 4)
     eval_results["metrics"]["overfitting_gap"] = round(float(train_acc - test_acc), 4)
     eval_results["metrics"]["optimal_threshold"] = classifier.optimal_threshold
+    eval_results["metrics"]["validation_records"] = int(len(val_df))
+    eval_results["metrics"]["test_identity_sha256"] = _identity_digest(test_df)
+    eval_results["metrics"]["test_records"] = int(len(test_df))
+    eval_results["metrics"]["train_records"] = int(len(train_df))
+    eval_results["metrics"]["validation_records"] = int(len(val_df))
 
     save_evaluation_results(eval_results, out_cfg["results_dir"])
     plot_and_save_figures(y_test, y_pred, y_proba, out_cfg["figures_dir"])
@@ -138,6 +145,11 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
     )
 
     print("\nBaseline experiment pipeline completed successfully!")
+
+
+def _identity_digest(frame):
+    identity = frame[["source", "project", "issue_id"]].astype(str).to_csv(index=False, header=False).encode("utf-8")
+    return hashlib.sha256(identity).hexdigest()
 
 
 if __name__ == "__main__":

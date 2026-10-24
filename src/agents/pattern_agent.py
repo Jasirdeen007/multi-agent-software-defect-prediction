@@ -16,6 +16,7 @@ Defect Pattern Indicators:
 Instructions:
 1. Detect characteristic defect or non-defect patterns in the text.
 2. Evaluate pattern strength and prevalence.
+3. Keep the reason to at most 25 words; include at most two evidence strings, each under 12 words.
 3. Output STRICT JSON adhering to this schema:
 {
   "agent": "pattern_agent",

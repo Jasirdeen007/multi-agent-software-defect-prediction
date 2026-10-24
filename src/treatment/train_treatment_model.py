@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import yaml
 import pandas as pd
@@ -10,6 +11,7 @@ from src.baseline.embedding_extractor import DebertaEmbeddingExtractor, get_or_e
 from src.baseline.evaluator import evaluate_predictions, plot_and_save_figures, save_evaluation_results
 from src.baseline.data_splitter import validate_split_disjointness
 from src.baseline.xgboost_classifier import XGBoostBaselineClassifier
+from src.baseline.run_baseline import _identity_digest
 
 
 def train_treatment_pipeline(
@@ -71,9 +73,20 @@ def train_treatment_pipeline(
     result = evaluate_predictions(y_test, pred, proba)
     result["metrics"]["train_accuracy"] = round(float(accuracy_score(y_train, classifier.predict(X_train))), 4)
     result["metrics"]["optimal_threshold"] = classifier.optimal_threshold
+    result["metrics"]["test_identity_sha256"] = _identity_digest(test)
+    result["metrics"]["test_records"] = int(len(test))
+    result["metrics"]["train_records"] = int(len(train))
+    result["metrics"]["validation_records"] = int(len(val))
     results_dir = Path("outputs/results/treatment")
     results_dir.mkdir(parents=True, exist_ok=True)
     save_evaluation_results(result, str(results_dir))
+    policy_path = results_dir / "label_policy.json"
+    policy_path.write_text(json.dumps({
+        "audited_labels": int(train["is_audited"].sum()),
+        "training_records": int(len(train)),
+        "test_identity_sha256": result["metrics"]["test_identity_sha256"],
+        "label_policy": "judge_label for audited training issues; original_label otherwise",
+    }, indent=2), encoding="utf-8")
     plot_and_save_figures(y_test, pred, proba, "outputs/figures/treatment")
     return result["metrics"]
 

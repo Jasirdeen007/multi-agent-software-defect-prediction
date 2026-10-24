@@ -16,16 +16,17 @@ Guidelines:
 4. Output STRICT JSON adhering to this schema:
 {
   "final_label": "bug" or "non-bug",
-  "confidence": <float between 0.0 and 1.0>,
   "reasoning_summary": "<clear explanation of why this verdict was reached and how disagreement was resolved>",
   "evidence": ["<consolidated decisive evidence 1>", "<consolidated decisive evidence 2>"]
 }
+Keep the reasoning and evidence concise. Do not include a confidence field.
 """
 
 class JudgeAgent(BaseAuditAgent):
     """Synthesizes sub-agent verdicts and arbitrates label disputes (AGENTS.md Sec 19 & 21)."""
 
     def __init__(self, model: str = "openai/gpt-oss-120b", **kwargs):
+        kwargs.setdefault("max_completion_tokens", 512)
         super().__init__(name="judge_agent", model=model, **kwargs)
 
     async def arbitrate(
@@ -68,9 +69,16 @@ Respond in valid JSON."""
         else:
             norm_label = "bug"
 
+        supporting_confidences = [v.confidence for v in verdicts if v.label == norm_label]
+        # Transparent consensus score; it is not a calibrated probability.
+        judge_confidence = round(
+            (sum(supporting_confidences) / len(supporting_confidences)) * agreement_ratio,
+            2,
+        ) if supporting_confidences else 0.0
+
         return JudgeVerdict(
             final_label=norm_label,
-            confidence=float(raw_json.get("confidence", 0.90)),
+            confidence=judge_confidence,
             agreement=agreement_ratio,
             agent_outputs=agent_outputs,
             reasoning_summary=str(raw_json.get("reasoning_summary", "Synthesized multi-agent consensus")),

@@ -11,10 +11,7 @@ import pyarrow.parquet as pq
 from tqdm.asyncio import tqdm_asyncio
 import yaml
 
-from src.agents.data_agent import DataAgent
-from src.agents.judge_agent import JudgeAgent
-from src.agents.pattern_agent import PatternAgent
-from src.agents.policy_agent import PolicyAgent
+from src.agents.four_perspective_agent import FourPerspectiveAgent
 from src.agents.schemas import AuditedIssueRecord
 from src.agents.storage import save_audited_records
 
@@ -28,27 +25,27 @@ class MultiAgentAuditOrchestrator:
 
         llm_cfg = self.config["llm"]
         self.rate_limit_delay = float(llm_cfg.get("rate_limit_delay_seconds", 1.5))
+        self.stop_reason: str | None = None
+        self.failure_count = 0
 
-        retries = int(llm_cfg.get("max_retries", 6))
-        self.policy_agent = PolicyAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
-        self.data_agent = DataAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
-        self.pattern_agent = PatternAgent(model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"), max_retries=retries)
-        self.judge_agent = JudgeAgent(model=llm_cfg.get("judge_model", "openai/gpt-oss-120b"), max_retries=retries)
+        retries = int(llm_cfg.get("max_retries", 3))
+        timeout = float(llm_cfg.get("request_timeout_seconds", 60))
+        pacing = float(llm_cfg.get("min_request_interval_seconds", 18))
+        self.four_perspective_agent = FourPerspectiveAgent(
+            provider=llm_cfg.get("provider", "groq"),
+            model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"),
+            max_retries=retries,
+            request_timeout_seconds=timeout,
+            min_request_interval_seconds=pacing,
+        )
 
     async def audit_single_issue(self, issue: dict[str, Any]) -> AuditedIssueRecord:
         """Runs the 3 specialized agents concurrently, then arbitrates via the Judge."""
-        agents = [self.policy_agent, self.data_agent, self.pattern_agent, self.judge_agent]
+        agents = [self.four_perspective_agent]
         usage_before = [(a.prompt_tokens, a.completion_tokens) for a in agents]
-        # 1. Run Policy, Data, and Pattern agents in parallel
-        verdicts = await asyncio.gather(
-            self.policy_agent.evaluate(issue),
-            self.data_agent.evaluate(issue),
-            self.pattern_agent.evaluate(issue),
-        )
+        # Four roles are generated in one model call; they are not independent agents.
+        verdicts, judge_res = await self.four_perspective_agent.evaluate(issue)
         policy_res, data_res, pattern_res = verdicts
-
-        # 2. Arbitrate with Judge
-        judge_res = await self.judge_agent.arbitrate(issue, list(verdicts))
 
         # 3. Assess label flip against original BugHub source label
         orig_label = str(issue.get("original_label", "")).lower().strip()
@@ -79,6 +76,9 @@ class MultiAgentAuditOrchestrator:
             agent_agreement=judge_res.agreement,
             label_flipped=label_flipped,
             audit_timestamp=datetime.now(timezone.utc).isoformat(),
+            audit_method="single_model_four_perspective_one_call",
+            audit_provider=self.four_perspective_agent.provider,
+            audit_model=self.four_perspective_agent.model,
             api_prompt_tokens=sum(a.prompt_tokens - before[0] for a, before in zip(agents, usage_before)),
             api_completion_tokens=sum(a.completion_tokens - before[1] for a, before in zip(agents, usage_before)),
         )
@@ -107,19 +107,26 @@ class MultiAgentAuditOrchestrator:
 
             for res in batch_results:
                 if isinstance(res, Exception):
+                    self.failure_count += 1
                     print(f"[Warning] Failed to audit issue: {res}")
+                    error_text = str(res).lower()
+                    if any(marker in error_text for marker in ("429", "rate limit", "quota reached", "timed out", "timeout")):
+                        self.stop_reason = "Provider limit or timeout encountered; saved completed records and paused this run."
                 else:
                     audited_records.append(res)
 
             print(f"Audited {len(audited_records)}/{total} issues...")
 
-            # Periodic checkpoint
-            if len(audited_records) % checkpoint_freq == 0 and len(audited_records) > 0:
+            # Persist every batch so a stopped run never loses completed work.
+            if len(audited_records) > 0:
                 save_audited_records(
                     audited_records,
                     output_dir=self.config["audit"].get("output_dir", "outputs/results/audited"),
                     parquet_path=self.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"),
                 )
+
+            if self.stop_reason:
+                break
 
             # Rate limit pacing
             if i + batch_size < total:
@@ -134,6 +141,7 @@ async def main():
     parser.add_argument("--sample-size", type=int, default=0, help="Optional cap; default audits every row in the preselected training-only sample")
     parser.add_argument("--batch-size", type=int, default=2)
     parser.add_argument("--random-seed", type=int, default=42)
+    parser.add_argument("--max-requests", type=int, default=0, help="Stop after this many issue audits; supports resumable quota-sized runs")
     args = parser.parse_args()
 
     orchestrator = MultiAgentAuditOrchestrator(config_path=args.config)
@@ -146,16 +154,30 @@ async def main():
     ]
     df = pd.read_parquet(dataset_path, columns=cols)
 
+    train_path = Path("data/processed/fixed_splits/train.parquet")
+    if not train_path.exists():
+        raise FileNotFoundError(f"Frozen training split is required to verify audit eligibility: {train_path}")
+    train_ids = pd.read_parquet(train_path, columns=["source", "project", "issue_id"])
+    audit_ids = df[["source", "project", "issue_id"]].astype(str)
+    train_keys = set(map(tuple, train_ids.astype(str).itertuples(index=False, name=None)))
+    audit_keys = set(map(tuple, audit_ids.itertuples(index=False, name=None)))
+    outside_train = audit_keys - train_keys
+    if outside_train:
+        raise ValueError(f"Audit candidate dataset contains {len(outside_train)} records outside the frozen training split; refusing API calls.")
+    print(f"Verified all {len(df):,} audit candidates belong to frozen training data.")
+
     # Filter out already audited issues
     parquet_out = Path(orchestrator.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"))
     if parquet_out.exists():
         try:
-            audited_existing = pd.read_parquet(parquet_out, columns=["source", "project", "issue_id"])
+            audited_existing = pd.read_parquet(parquet_out)
+            if not {"source", "project", "issue_id"}.issubset(audited_existing.columns):
+                raise ValueError("Existing audited parquet lacks composite identity columns")
             existing_keys = set(zip(audited_existing["source"], audited_existing["project"], audited_existing["issue_id"].astype(str)))
             df = df[~df.apply(lambda row: (row["source"], row["project"], str(row["issue_id"])) in existing_keys, axis=1)]
             print(f"Skipping {len(existing_keys)} already-audited records. Remaining candidate pool: {len(df)}")
         except Exception as e:
-            print(f"[Info] Note on existing audited parquet: {e}")
+            raise RuntimeError(f"Cannot safely resume from existing audit parquet {parquet_out}: {e}") from e
 
     # The input file is already the reproducible, training-only audit sample.
     if args.sample_size > 0 and args.sample_size < len(df):
@@ -163,19 +185,23 @@ async def main():
     else:
         df_sample = df
 
+    if args.max_requests > 0 and len(df_sample) > args.max_requests:
+        df_sample = df_sample.iloc[:args.max_requests]
+
 
     issues = df_sample.to_dict(orient="records")
     results = await orchestrator.run_batch_audit(issues, batch_size=args.batch_size)
 
-    agents = [orchestrator.policy_agent, orchestrator.data_agent, orchestrator.pattern_agent, orchestrator.judge_agent]
+    agents = [orchestrator.four_perspective_agent]
     prompt_tokens = sum(agent.prompt_tokens for agent in agents)
     completion_tokens = sum(agent.completion_tokens for agent in agents)
 
-    save_audited_records(
-        results,
-        output_dir=orchestrator.config["audit"].get("output_dir", "outputs/results/audited"),
-        parquet_path=orchestrator.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"),
-    )
+    if results:
+        save_audited_records(
+            results,
+            output_dir=orchestrator.config["audit"].get("output_dir", "outputs/results/audited"),
+            parquet_path=orchestrator.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"),
+        )
     usage_path = Path(orchestrator.config["audit"].get("output_dir", "outputs/results/audited")) / "api_usage.json"
     pricing = orchestrator.config["llm"].get("pricing_usd_per_million_tokens", {})
     usage_by_model: dict[str, dict[str, int]] = {}
@@ -200,6 +226,15 @@ async def main():
         "estimated_cost_usd": estimated_cost,
         "pricing_source": "configs/agents_config.yaml per-model rates" if estimated_cost is not None else "not configured for every model; token usage only",
     }, indent=2), encoding="utf-8")
+    protocol_path = usage_path.parent / "audit_protocol.json"
+    protocol_path.write_text(json.dumps({
+        "method": "single_model_four_perspective_one_call",
+        "calls_per_issue": 1,
+        "perspectives_are_independent_agents": False,
+        "judge_confidence_definition": "mean confidence of council perspectives supporting Judge label multiplied by majority agreement; not calibrated",
+        "sample_size": pq.ParquetFile(dataset_path).metadata.num_rows,
+        "candidate_dataset": dataset_path,
+    }, indent=2), encoding="utf-8")
     all_audited = pd.read_parquet(parquet_out)
     train_split_path = Path("data/processed/fixed_splits/train.parquet")
     training_records = pq.ParquetFile(train_split_path).metadata.num_rows
@@ -217,7 +252,12 @@ async def main():
     metrics_path = usage_path.parent / "audit_metrics.json"
     metrics_path.write_text(json.dumps(audit_metrics, indent=2), encoding="utf-8")
     print(f"API token/cost summary written to {usage_path}")
-    print("Multi-agent auditing process completed successfully!")
+    if orchestrator.stop_reason:
+        print(orchestrator.stop_reason)
+    elif orchestrator.failure_count:
+        print(f"Run ended with {orchestrator.failure_count} failed issue(s); resume to retry them.")
+    else:
+        print("Four-perspective audit process completed successfully!")
 
 
 if __name__ == "__main__":

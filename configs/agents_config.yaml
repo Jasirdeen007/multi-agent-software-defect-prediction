@@ -6,22 +6,25 @@ llm:
   fallback_model: "openai/gpt-oss-20b"
   temperature: 0.1
   max_tokens: 512
-  max_retries: 6
+  max_retries: 3
+  request_timeout_seconds: 60
+  min_request_interval_seconds: 18
   rate_limit_delay_seconds: 2.0
   # Optional actual vendor rates. Set every model used to enable USD estimates.
   # pricing_usd_per_million_tokens:
   #   "provider/model-id": {input: 0.0, output: 0.0}
 
 audit:
-  dataset_path: "data/processed/audit_train_sample.parquet"
-  sample_size: 5000
+  dataset_path: "data/processed/audit_train_sample_1000_from_5000.parquet"
+  sample_size: 1000
   batch_size: 5
   random_seed: 42
   checkpoint_frequency: 25
-  output_dir: "outputs/results/audited_train"
-  output_parquet: "data/processed/audited_train_labels.parquet"
+  output_dir: "outputs/results/audited_train_1000_onecall"
+  output_parquet: "data/processed/audited_train_1000_onecall_labels.parquet"
 
 roles:
+  audit_protocol: "single model call produces all three perspectives and Judge decision; perspectives are not independent agents"
   policy_agent:
     name: "Policy Compliance Agent"
     focus: "Evaluate issue description against ISO/IEEE defect definitions (malfunction vs feature request)"
