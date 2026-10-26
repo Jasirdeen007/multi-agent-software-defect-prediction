@@ -1,0 +1,42 @@
+[{"stream_name":"stderr","time":7.494176994,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.49422699,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.494231725,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.494234275,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.130629396,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.130660477,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.130664796,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.130667314,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":18.680294518,"data":"Tesla T4 14 GiB\n"}
+,{"stream_name":"stdout","time":18.680323099,"data":"Input: /kaggle/input/datasets/jasirdeen/multi-agent-sdp-canonical/bughubs_canonical.parquet bytes: 1037193661\n"}
+,{"stream_name":"stderr","time":49.712748093,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stderr","time":49.713418998,"data":"  File \"\u003cstring\u003e\", line 1, in \u003cmodule\u003e\n"}
+,{"stream_name":"stderr","time":49.713439452,"data":"    import sys;import papermill as pm;pm.execute_notebook(\"__notebook__.ipynb\",\"__notebook__.ipynb\",progress_bar=False,log_output=True,stdout_file=sys.stdout,stderr_file=sys.stderr,allow_errors=False,timeout=43200)\n"}
+,{"stream_name":"stderr","time":49.713448364,"data":"                                      ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":49.713454965,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 131, in execute_notebook\n"}
+,{"stream_name":"stderr","time":49.713460637,"data":"    raise_for_execution_errors(nb, output_path)\n"}
+,{"stream_name":"stderr","time":49.713465967,"data":"    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stderr","time":49.713471083,"data":"  File \"/usr/local/lib/python3.13/dist-packages/papermill/execute.py\", line 251, in raise_for_execution_errors\n"}
+,{"stream_name":"stderr","time":49.713476696,"data":"    raise error\n"}
+,{"stream_name":"stderr","time":49.713481745,"data":"papermill.exceptions.PapermillExecutionError: \n"}
+,{"stream_name":"stderr","time":49.713486857,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":49.713492558,"data":"Exception encountered at \"In [2]\":\n"}
+,{"stream_name":"stderr","time":49.713498604,"data":"---------------------------------------------------------------------------\n"}
+,{"stream_name":"stderr","time":49.713504332,"data":"AssertionError                            Traceback (most recent call last)\n"}
+,{"stream_name":"stderr","time":49.713511321,"data":"/tmp/ipykernel_22/3862548186.py in \u003ccell line: 0\u003e()\n"}
+,{"stream_name":"stderr","time":49.713516696,"data":"     12 KEYS = ['source','project','issue_id']\n"}
+,{"stream_name":"stderr","time":49.713521958,"data":"     13 ASSIGNMENTS = Path('/kaggle/input/datasets/jasirdeen/multi-agent-sdp-fixed-split/split_assignments.parquet')\n"}
+,{"stream_name":"stderr","time":49.71352724,"data":"---\u003e 14 assert ASSIGNMENTS.is_file(), f'Attach jasirdeen/multi-agent-sdp-fixed-split; not found: {ASSIGNMENTS}'\n"}
+,{"stream_name":"stderr","time":49.713544265,"data":"     15 assignments = pd.read_parquet(ASSIGNMENTS, columns=KEYS+['split','split_order'])\n"}
+,{"stream_name":"stderr","time":49.713549283,"data":"     16 df[KEYS] = df[KEYS].astype(str); assignments[KEYS] = assignments[KEYS].astype(str)\n"}
+,{"stream_name":"stderr","time":49.713553579,"data":"\n"}
+,{"stream_name":"stderr","time":49.713557588,"data":"AssertionError: Attach jasirdeen/multi-agent-sdp-fixed-split; not found: /kaggle/input/datasets/jasirdeen/multi-agent-sdp-fixed-split/split_assignments.parquet\n"}
+,{"stream_name":"stderr","time":49.713562519999996,"data":"\n"}
+,{"stream_name":"stderr","time":51.91376111,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":51.913787767,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":52.076576174,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":52.076601206,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":52.825777397,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":52.903056833,"data":"[NbConvertApp] Writing 17756 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":55.406805289,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":55.963054636,"data":"[NbConvertApp] Writing 329649 bytes to __results__.html\n"}
+]

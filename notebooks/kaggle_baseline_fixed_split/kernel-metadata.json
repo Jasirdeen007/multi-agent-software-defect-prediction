@@ -1,0 +1,17 @@
+{
+  "id": "jasirdeen/multi-agent-sdp-baseline-frozen-split",
+  "title": "Multi-Agent SDP Baseline - Frozen Split",
+  "code_file": "baseline_fixed_split.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": true,
+  "keywords": ["gpu", "software-defect-prediction", "deberta", "xgboost"],
+  "dataset_sources": ["jasirdeen/multi-agent-sdp-canonical", "jasirdeen/multi-agent-sdp-fixed-split"],
+  "kernel_sources": [],
+  "competition_sources": [],
+  "model_sources": [],
+  "machine_shape": "NvidiaTeslaT4"
+}

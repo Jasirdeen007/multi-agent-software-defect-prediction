@@ -5,10 +5,10 @@ from src.agents.base_agent import BaseAuditAgent
 from src.agents.schemas import AgentVerdict, JudgeVerdict
 
 JUDGE_SYSTEM_PROMPT = """You are the Arbitration & Synthesis Judge in a Multi-Agent Software Defect Prediction system.
-Your mission is to evaluate individual decisions from the Policy Agent, Data Agent, and Pattern Agent, synthesize their findings, resolve any disagreements, and determine the final audited ground truth label.
+Your mission is to evaluate individual decisions from the Semantic Auditor, Structural/KG Auditor, and Skeptic Auditor, synthesize their findings, resolve disagreements, and assign an audited label.
 
 Guidelines:
-1. Examine all three agent verdicts and their respective reasons and evidence.
+1. Examine all three specialist verdicts, reasons, and evidence.
 2. If all 3 agents agree, confirm the unanimous verdict and summarize the core rationale.
 3. If agents disagree (e.g. 2 vs 1):
    - Weigh the strength of textual evidence against metadata signals.
@@ -46,14 +46,13 @@ class JudgeAgent(BaseAuditAgent):
         user_prompt = f"""Target Issue:
 Title: {issue.get('title', '')}
 Source: {issue.get('source', '')} | Project: {issue.get('project', '')}
-Original BugHub Source Label: {issue.get('original_label', 'unknown')}
 
 Agent Verdicts:
-1. Policy Agent: {agent_outputs.get('policy_agent', {}).get('label')} (Confidence: {agent_outputs.get('policy_agent', {}).get('confidence')})
+1. Semantic Auditor: {agent_outputs.get('policy_agent', {}).get('label')} (Confidence: {agent_outputs.get('policy_agent', {}).get('confidence')})
    Reason: {agent_outputs.get('policy_agent', {}).get('reason')}
-2. Data Agent: {agent_outputs.get('data_agent', {}).get('label')} (Confidence: {agent_outputs.get('data_agent', {}).get('confidence')})
+2. Structural/KG Auditor: {agent_outputs.get('data_agent', {}).get('label')} (Confidence: {agent_outputs.get('data_agent', {}).get('confidence')})
    Reason: {agent_outputs.get('data_agent', {}).get('reason')}
-3. Pattern Agent: {agent_outputs.get('pattern_agent', {}).get('label')} (Confidence: {agent_outputs.get('pattern_agent', {}).get('confidence')})
+3. Skeptic Auditor: {agent_outputs.get('pattern_agent', {}).get('label')} (Confidence: {agent_outputs.get('pattern_agent', {}).get('confidence')})
    Reason: {agent_outputs.get('pattern_agent', {}).get('reason')}
 
 Sub-Agent Agreement Ratio: {agreement_ratio} ({majority_count}/{len(verdicts)})

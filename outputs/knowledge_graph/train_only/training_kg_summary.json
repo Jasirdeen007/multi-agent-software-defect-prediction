@@ -1,0 +1,14 @@
+{
+  "source_dataset": "data/processed/fixed_splits/train.parquet",
+  "split": "frozen training only",
+  "records": 648424,
+  "nodes": 2571,
+  "edges": 2570,
+  "node_types": {
+    "dataset": 1,
+    "source": 3,
+    "project": 79,
+    "component": 2475,
+    "severity": 13
+  }
+}

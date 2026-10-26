@@ -31,6 +31,7 @@ class BaseAuditAgent:
         min_request_interval_seconds: float = 15.0,
         max_completion_tokens: int = 256,
         provider: str = "groq",
+        api_key_env: str | None = None,
     ):
         self.name = name
         self.model = model
@@ -41,16 +42,17 @@ class BaseAuditAgent:
         self.min_request_interval_seconds = min_request_interval_seconds
         self.max_completion_tokens = max_completion_tokens
         self.provider = provider.lower().strip()
+        self.api_key_env = api_key_env or ("GROQ_API_KEY" if self.provider == "groq" else "GEMINI_API_KEY")
 
         if self.provider == "groq":
-            api_key = os.getenv("GROQ_API_KEY")
+            api_key = os.getenv(self.api_key_env)
             if not api_key:
-                raise ValueError("GROQ_API_KEY not found in environment. Set it in .env.")
+                raise ValueError(f"{self.api_key_env} not found in environment. Set it in .env.")
             # Disable SDK-level retries; the bounded, visible retry loop below owns them.
             self.client = AsyncGroq(api_key=api_key, timeout=request_timeout_seconds, max_retries=0)
         elif self.provider == "gemini":
-            if not os.getenv("GEMINI_API_KEY"):
-                raise ValueError("GEMINI_API_KEY not found in environment. Set it in .env to use Gemini.")
+            if not os.getenv(self.api_key_env):
+                raise ValueError(f"{self.api_key_env} not found in environment. Set it in .env to use Gemini.")
             self.client = None
         else:
             raise ValueError(f"Unsupported LLM provider: {provider!r}; expected 'groq' or 'gemini'.")
@@ -69,9 +71,10 @@ class BaseAuditAgent:
         current_model = self.model
         while attempt < self.max_retries:
             try:
-                lock = _MODEL_LOCKS.setdefault(current_model, asyncio.Lock())
+                slot_key = f"{self.provider}:{self.api_key_env}:{current_model}"
+                lock = _MODEL_LOCKS.setdefault(slot_key, asyncio.Lock())
                 async with lock:
-                    elapsed = time.monotonic() - _MODEL_LAST_REQUEST_AT.get(current_model, 0.0)
+                    elapsed = time.monotonic() - _MODEL_LAST_REQUEST_AT.get(slot_key, 0.0)
                     wait_for_slot = self.min_request_interval_seconds - elapsed
                     if wait_for_slot > 0:
                         await asyncio.sleep(wait_for_slot)
@@ -91,7 +94,7 @@ class BaseAuditAgent:
                         response, raw_text, prompt_tokens, completion_tokens = await asyncio.to_thread(
                             self._gemini_generate, current_model, system_prompt, user_prompt
                         )
-                    _MODEL_LAST_REQUEST_AT[current_model] = time.monotonic()
+                    _MODEL_LAST_REQUEST_AT[slot_key] = time.monotonic()
                 if prompt_tokens or completion_tokens:
                     self.prompt_tokens += prompt_tokens
                     self.completion_tokens += completion_tokens
@@ -132,9 +135,9 @@ class BaseAuditAgent:
         self, model: str, system_prompt: str, user_prompt: str
     ) -> tuple[dict[str, Any], str, int, int]:
         """Calls Gemini's generateContent REST API using the standard library."""
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv(self.api_key_env)
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment.")
+            raise ValueError(f"{self.api_key_env} not found in environment.")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         payload = {
             "systemInstruction": {"parts": [{"text": system_prompt}]},

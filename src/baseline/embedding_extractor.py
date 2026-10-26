@@ -45,6 +45,8 @@ class DebertaEmbeddingExtractor:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(device)
+            if self.device.type == "cuda" and not torch.cuda.is_available():
+                raise RuntimeError("CUDA was requested but is unavailable; refusing to fall back to CPU.")
 
         # Check if model_name itself is an adapter directory or if adapter_path is provided
         eff_adapter = None

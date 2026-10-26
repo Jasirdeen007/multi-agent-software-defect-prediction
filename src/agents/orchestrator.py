@@ -11,7 +11,10 @@ import pyarrow.parquet as pq
 from tqdm.asyncio import tqdm_asyncio
 import yaml
 
-from src.agents.four_perspective_agent import FourPerspectiveAgent
+from src.agents.policy_agent import PolicyAgent
+from src.agents.data_agent import DataAgent
+from src.agents.pattern_agent import PatternAgent
+from src.agents.judge_agent import JudgeAgent
 from src.agents.schemas import AuditedIssueRecord
 from src.agents.storage import save_audited_records
 
@@ -31,21 +34,35 @@ class MultiAgentAuditOrchestrator:
         retries = int(llm_cfg.get("max_retries", 3))
         timeout = float(llm_cfg.get("request_timeout_seconds", 60))
         pacing = float(llm_cfg.get("min_request_interval_seconds", 18))
-        self.four_perspective_agent = FourPerspectiveAgent(
-            provider=llm_cfg.get("provider", "groq"),
-            model=llm_cfg.get("subagent_model", "qwen/qwen3.8-27b"),
-            max_retries=retries,
-            request_timeout_seconds=timeout,
-            min_request_interval_seconds=pacing,
+        defaults = {"max_retries": retries, "request_timeout_seconds": timeout,
+                    "min_request_interval_seconds": pacing}
+        def make_agent(cls, name: str):
+            cfg = llm_cfg.get("agents", {}).get(name, {})
+            return cls(model=cfg.get("model", llm_cfg.get("subagent_model", "qwen/qwen3.8-27b")),
+                       provider=cfg.get("provider", llm_cfg.get("provider", "groq")),
+                       api_key_env=cfg.get("api_key_env"), **defaults)
+        self.policy_agent = make_agent(PolicyAgent, "semantic")
+        self.data_agent = make_agent(DataAgent, "structural")
+        self.pattern_agent = make_agent(PatternAgent, "skeptic")
+        judge_cfg = llm_cfg.get("agents", {}).get("judge", {})
+        self.judge_agent = JudgeAgent(
+            model=judge_cfg.get("model", llm_cfg.get("judge_model", "openai/gpt-oss-120b")),
+            provider=judge_cfg.get("provider", llm_cfg.get("provider", "groq")),
+            api_key_env=judge_cfg.get("api_key_env"), **defaults,
         )
 
     async def audit_single_issue(self, issue: dict[str, Any]) -> AuditedIssueRecord:
         """Runs the 3 specialized agents concurrently, then arbitrates via the Judge."""
-        agents = [self.four_perspective_agent]
+        agents = [self.policy_agent, self.data_agent, self.pattern_agent, self.judge_agent]
         usage_before = [(a.prompt_tokens, a.completion_tokens) for a in agents]
-        # Four roles are generated in one model call; they are not independent agents.
-        verdicts, judge_res = await self.four_perspective_agent.evaluate(issue)
-        policy_res, data_res, pattern_res = verdicts
+        # Each specialist and the Judge make a separate API call.
+        policy_res, data_res, pattern_res = await asyncio.gather(
+            self.policy_agent.evaluate(issue),
+            self.data_agent.evaluate(issue),
+            self.pattern_agent.evaluate(issue),
+        )
+        verdicts = [policy_res, data_res, pattern_res]
+        judge_res = await self.judge_agent.arbitrate(issue, verdicts)
 
         # 3. Assess label flip against original BugHub source label
         orig_label = str(issue.get("original_label", "")).lower().strip()
@@ -76,9 +93,9 @@ class MultiAgentAuditOrchestrator:
             agent_agreement=judge_res.agreement,
             label_flipped=label_flipped,
             audit_timestamp=datetime.now(timezone.utc).isoformat(),
-            audit_method="single_model_four_perspective_one_call",
-            audit_provider=self.four_perspective_agent.provider,
-            audit_model=self.four_perspective_agent.model,
+            audit_method="four_separate_agent_calls",
+            audit_provider="per_agent_configured",
+            audit_model=",".join(f"{a.name}:{a.model}" for a in agents),
             api_prompt_tokens=sum(a.prompt_tokens - before[0] for a, before in zip(agents, usage_before)),
             api_completion_tokens=sum(a.completion_tokens - before[1] for a, before in zip(agents, usage_before)),
         )
@@ -112,6 +129,8 @@ class MultiAgentAuditOrchestrator:
                     error_text = str(res).lower()
                     if any(marker in error_text for marker in ("429", "rate limit", "quota reached", "timed out", "timeout")):
                         self.stop_reason = "Provider limit or timeout encountered; saved completed records and paused this run."
+                    elif any(marker in error_text for marker in ("401", "403", "unauthorized", "invalid api key", "api key not found")):
+                        self.stop_reason = "Provider authentication failed; saved completed records and paused this run."
                 else:
                     audited_records.append(res)
 
@@ -192,7 +211,8 @@ async def main():
     issues = df_sample.to_dict(orient="records")
     results = await orchestrator.run_batch_audit(issues, batch_size=args.batch_size)
 
-    agents = [orchestrator.four_perspective_agent]
+    agents = [orchestrator.policy_agent, orchestrator.data_agent,
+              orchestrator.pattern_agent, orchestrator.judge_agent]
     prompt_tokens = sum(agent.prompt_tokens for agent in agents)
     completion_tokens = sum(agent.completion_tokens for agent in agents)
 
@@ -203,6 +223,7 @@ async def main():
             parquet_path=orchestrator.config["audit"].get("output_parquet", "data/processed/audited_labels.parquet"),
         )
     usage_path = Path(orchestrator.config["audit"].get("output_dir", "outputs/results/audited")) / "api_usage.json"
+    usage_path.parent.mkdir(parents=True, exist_ok=True)
     pricing = orchestrator.config["llm"].get("pricing_usd_per_million_tokens", {})
     usage_by_model: dict[str, dict[str, int]] = {}
     for agent in agents:
@@ -228,17 +249,18 @@ async def main():
     }, indent=2), encoding="utf-8")
     protocol_path = usage_path.parent / "audit_protocol.json"
     protocol_path.write_text(json.dumps({
-        "method": "single_model_four_perspective_one_call",
-        "calls_per_issue": 1,
+        "method": "four_separate_agent_calls",
+        "calls_per_issue": 4,
         "perspectives_are_independent_agents": False,
-        "judge_confidence_definition": "mean confidence of council perspectives supporting Judge label multiplied by majority agreement; not calibrated",
+        "separate_api_call_per_role": True,
+        "judge_confidence_definition": "mean specialist confidence supporting Judge label multiplied by majority agreement; not calibrated",
         "sample_size": pq.ParquetFile(dataset_path).metadata.num_rows,
         "candidate_dataset": dataset_path,
     }, indent=2), encoding="utf-8")
-    all_audited = pd.read_parquet(parquet_out)
+    all_audited = pd.read_parquet(parquet_out) if parquet_out.exists() else pd.DataFrame()
     train_split_path = Path("data/processed/fixed_splits/train.parquet")
     training_records = pq.ParquetFile(train_split_path).metadata.num_rows
-    flips = int(all_audited["label_flipped"].sum())
+    flips = int(all_audited["label_flipped"].sum()) if "label_flipped" in all_audited else 0
     audit_metrics = {
         "audited_records": int(len(all_audited)),
         "training_records": int(training_records),

@@ -32,6 +32,8 @@ data:
   val_size: 0.15
   random_seed: 42
   stratify_column: "original_label"
+  split_dir: "/kaggle/working/data/processed/fixed_splits"
+  split_assignments_path: "/kaggle/input/datasets/jasirdeen/multi-agent-sdp-fixed-split/split_assignments.parquet"
 
 xgboost:
   n_estimators: 500
@@ -54,7 +56,7 @@ shap:
   sample_size: 500
 
 output:
-  embeddings_dir: "/kaggle/working/data/embeddings/full_baseline"
-  model_dir: "/kaggle/working/outputs/models/baseline/full"
-  results_dir: "/kaggle/working/outputs/results/baseline/full"
-  figures_dir: "/kaggle/working/outputs/figures/baseline/full"
+  embeddings_dir: "/kaggle/working/data/embeddings/fixed_split"
+  model_dir: "/kaggle/working/outputs/models/baseline/fixed_split"
+  results_dir: "/kaggle/working/outputs/results/baseline/fixed_split"
+  figures_dir: "/kaggle/working/outputs/figures/baseline/fixed_split"

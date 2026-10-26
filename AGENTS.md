@@ -661,12 +661,17 @@ Agent-audited labels
 
 # 18. Multi-Agent System
 
+The audit uses four separate LLM API calls per issue: one each for the Semantic,
+Structural/KG, and Skeptic auditors, followed by a separate Judge call. Distinct
+calls preserve role-specific outputs; do not claim statistical independence when
+agents share a provider or model.
+
 Planned agents:
 
 ```text
-Policy Agent
-Data Agent
-Pattern Agent
+Semantic Auditor (PolicyAgent)
+Structural/KG Auditor (DataAgent)
+Skeptic Auditor (PatternAgent)
 Judge
 ```
 
@@ -674,7 +679,7 @@ Agents must have clearly separated responsibilities.
 
 ---
 
-## 18.1 Policy Agent
+## 18.1 Semantic Auditor (PolicyAgent)
 
 Purpose:
 
@@ -705,7 +710,7 @@ Do not claim the confidence is calibrated unless calibration is actually evaluat
 
 ---
 
-## 18.2 Data Agent
+## 18.2 Structural/KG Auditor (DataAgent)
 
 Purpose:
 
@@ -742,7 +747,7 @@ Do not treat a single metadata field as automatic proof of the final label.
 
 ---
 
-## 18.3 Pattern Agent
+## 18.3 Skeptic Auditor (PatternAgent)
 
 Purpose:
 
@@ -976,6 +981,8 @@ Each relationship should have a clear purpose for:
 - project context
 - explainability
 
+For label-audit evidence, derive all label statistics from the frozen training split only.
+Exclude the target issue's own source label from any label-rate evidence shown to that issue.
 The Knowledge Graph should support the multi-agent system rather than becoming an
 unrelated component.
 
@@ -2003,39 +2010,25 @@ unless explicitly required.
 
 # 57. Current Priority
 
-The immediate priority is:
+Current state:
 
 ```text
-Complete and validate Phase I EDA
+Canonical dataset and EDA complete
+Frozen 70/15/15 split available (seed 42)
+Training-only aggregate Knowledge Graph rebuilt
+Historical Kaggle baseline exists; its test identity hash is not confirmed
+Fresh fixed-split, GPU-only Kaggle baseline notebook is running
+New four-call audit has 0 labels because Gemini project access returned HTTP 403
 ```
 
-The next priority is:
+Next priorities:
 
 ```text
-Knowledge Graph Construction
-```
-
-After that:
-
-```text
-Policy Agent
-Data Agent
-Pattern Agent
-Judge
-```
-
-Then:
-
-```text
-Agent-Audited Label Dataset
-```
-
-Then:
-
-```text
-DeBERTa-v3
-XGBoost
-SHAP
+Obtain eligible provider access and complete 1,000 training-only audits
+Rebuild treatment labels using Judge labels for audited train rows only
+Collect fresh baseline output and verify its frozen split hashes
+Train/evaluate treatment against identical frozen split identities in Kaggle
+Record and compare matching test identity hashes and metrics
 ```
 
 Do not jump directly to model training while foundational data and label-auditing

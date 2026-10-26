@@ -33,6 +33,7 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
         test_size=data_cfg.get("test_size", 0.15),
         val_size=data_cfg.get("val_size", 0.15),
         random_seed=data_cfg.get("random_seed", 42),
+        split_assignments_path=data_cfg.get("split_assignments_path"),
     )
     label_map = data_cfg.get("label_map", {"bug": 1, "non-bug": 0})
     for part in (train_df, val_df, test_df):
