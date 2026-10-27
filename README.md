@@ -195,6 +195,8 @@ The selected candidate samples remain available to resume the audit. Treatment d
 
 The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The historical 1,000-row audit output is tracked at `outputs/results/audited_train_1000_onecall/audited_records.json`; it was produced by a single-call four-perspective protocol and is not the current four-separate-call audit, so do not use it as the current treatment labels.
 
+For the current agent audit, `data/processed/audit_train_sample.parquet` is a reproducible 5,000-row sample from the frozen training split, and `data/processed/audit_train_sample_1000_from_5000.parquet` is the nested 1,000-row audit queue. Both use seed 42 and cover 79 projects; their selection summaries and identity lists are in `outputs/results/audit_sampling/`. One expired 2019 signed-download URL in a sampled issue had its AWS authentication query removed; the issue identity, label, and remaining text were preserved. The older `audit_sample.parquet` was sampled from the full canonical dataset, so it can include validation/test records and must not be used for agent training. The full canonical Parquet is not needed to run the audit or paired model experiment: the frozen split files and training-only samples provide the required inputs.
+
 ## API and dashboard
 
 Start the backend:
