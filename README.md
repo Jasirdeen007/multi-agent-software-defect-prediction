@@ -33,11 +33,10 @@ flowchart TD
 |---|---|
 | Canonical data and EDA | Complete. Canonical Parquet has 926,461 records: 648,841 `bug`, 277,620 `non-bug`. |
 | Model-ready frozen split | Available: 648,424 train, 138,948 validation, 138,949 test (926,321 total; seed 42). |
-| Kaggle split alignment | Exact `(source, project, issue_id, split, split_order)` mapping uploaded as private dataset `jasirdeen/multi-agent-sdp-fixed-split`; it avoids relying on canonical Parquet row order. |
-| Baseline | The historical baseline was trained in Kaggle, but its metrics lack the current test-identity hash. A fresh GPU run using the frozen split is now running in the private Kaggle kernel [`multi-agent-sdp-baseline-frozen-split`](https://www.kaggle.com/jasirdeen/multi-agent-sdp-baseline-frozen-split). It writes train/validation/test hashes with its metrics. No local baseline job is active; the optional local config requires CUDA. |
+| Baseline | Locally trained and tuned on CUDA using the frozen split. Current held-out accuracy 0.8043, ROC-AUC 0.8561, macro-F1 0.7546. Model/results are retained under `outputs/models/baseline/fixed_split/tuned_xgboost/` and `outputs/results/baseline/fixed_split/tuned_xgboost/`. |
 | Knowledge Graph | Rebuilt from the 648,424 frozen training rows only. The audit retriever now reads this split and excludes each target issue from its own label-derived priors. Artifacts are under `outputs/knowledge_graph/train_only/`. |
 | Audit sampling | 5,000 training-only candidates across 79 projects; a nested, stratified 1,000-record sample was selected. |
-| Agent audit | The new runner is configured for 1,000 unique training-only candidates and four separate role calls. The first attempt produced **0 audited labels**: Gemini returned HTTP 403 stating its free tier is unavailable for the supplied project. The former 200 one-call records are not reused or mixed into this run. |
+| Agent audit | The new runner is configured for 1,000 unique training-only candidates and four separate role calls. The first attempt produced **0 audited labels**: Gemini returned HTTP 403 stating its free tier is unavailable for the supplied project. The earlier audit outputs from 20-record and 200-record protocols have been removed because they do not meet the current four-separate-call audit protocol. |
 | Treatment dataset | To be rebuilt after the new 1,000-record audit completes: full training split, Judge labels for audited rows, original labels elsewhere. |
 | Paired treatment training/evaluation | Pending audit completion and treatment dataset rebuild. No current baseline-versus-treatment conclusion is available. |
 | Application | FastAPI backend and React frontend are present; production readiness is a separate task. |
@@ -46,7 +45,7 @@ flowchart TD
 
 The selected 1,000-record candidate sample is nested within the 5,000-record training sample and stratified by project and original label. All 1,000 identities were verified to be unique and in the frozen training split. The separate-call audit has not produced labels yet. Its eventual completion count will be recorded in `data/processed/audited_train_1000_independent_calls_labels.parquet`.
 
-The supplied Gemini credentials were rejected with HTTP 403 because the associated project does not have Gemini free-tier access. No treatment dataset should be rebuilt from this failed run. The old 200 one-call records belong to the former protocol and remain separate.
+The supplied Gemini credentials were rejected with HTTP 403 because the associated project does not have Gemini free-tier access. No treatment dataset should be rebuilt from this failed run. No valid audit labels or treatment dataset/model artifacts are currently retained. The earlier outputs from incompatible audit protocols were removed.
 
 The new training-only graph is built with `python -m src.knowledge_graph.build_training_kg`. It reads only `data/processed/fixed_splits/train.parquet`; the retriever excludes the current issue's original label from its own project/component/severity rates. The previous mixed-split graph artifacts are historical and are not used by the new audit retriever.
 
@@ -79,28 +78,20 @@ Labels:            bug / non-bug
 
 The existing baseline pipeline uses `model_text` as input, extracts frozen embeddings with `microsoft/deberta-v3-small`, and trains a regularized XGBoost classifier. Baseline training uses all 648,424 rows of the frozen training split with `original_label`. Validation is used for model selection/early stopping; test is reserved for evaluation.
 
-An older baseline artifact reports accuracy **0.7852** and ROC-AUC **0.8301**. Its metrics do not include a test identity hash, so they cannot prove that this run used the current frozen test identities. Treat these as historical model results, not a paired result.
+The current baseline is the 15-trial tuned CUDA XGBoost model selected on validation ROC-AUC. Its held-out test accuracy is **0.8043**, ROC-AUC **0.8561**, and macro-F1 **0.7546**, on the frozen 138,949-row test split (identity SHA-256 `cc5b147ddba1b01bf252c0ab2d3b0b596bb3674a80458d8f3976208a2f53b0a1`). It uses all 648,424 frozen training rows with `original_label`. The current model and threshold are in `outputs/models/baseline/fixed_split/tuned_xgboost/`; metrics, best parameters, trial history, and classification report are in `outputs/results/baseline/fixed_split/tuned_xgboost/`. Older full-dataset and untuned fixed-split model outputs were removed to avoid ambiguity. Use this tuned configuration for any paired treatment comparison.
 
 ### Treatment
 
-The current treatment dataset is:
+No treatment dataset or trained treatment model is currently retained. After the valid four-call audit completes, build a treatment dataset from the complete frozen training split using:
 
 ```text
-data/processed/fixed_splits/treatment_train.parquet
-```
-
-Its label rule is:
-
-```text
-if is_audited:
-    treatment_label = audited_label  # Judge decision
+if identity has a valid Judge audit:
+    treatment_label = judge_label
 else:
     treatment_label = original_label
 ```
 
-This keeps the **full training set** for treatment training; the 200 audited issues provide revised labels for only those rows. The baseline and treatment should use the same DeBERTa embeddings, XGBoost settings, training identities, validation set, and untouched test identities. The intended experimental difference is the training target labels.
-
-Historical treatment artifacts describe a separate 5,000-row experiment with 20 audited labels, a 3,500/750/750 split, and different training details. They are not comparable to the historical full-data baseline and are not results for the current treatment dataset.
+Keep `original_label` unchanged. Then train with the same DeBERTa embeddings, XGBoost settings, training identities, validation set, and untouched test identities as the baseline. The intended experimental difference is the training target labels.
 
 Do not interpret a gain in predictive metrics as proof that the audit labels are correct. Without an independently verified label set, the experiment measures downstream model changes associated with this label-replacement procedure.
 
@@ -147,14 +138,11 @@ EDA output: `outputs/reports/EDA_Report.html`.
 
 ### Freeze or reuse the split
 
-The checked-in split manifest records the current split. Do not recreate it during a paired experiment; both models must load the same split files. When row order may differ (for example, in a Kaggle copy), export and attach the identity assignment map; verify its hashes before fitting.
+The checked-in split manifest records the current split. Do not recreate it during a paired experiment; both models must load the same split files. The current baseline has already been trained locally on CUDA from these frozen splits.
 
-```powershell
-python -m src.baseline.data_splitter --dataset data/processed/bughubs_canonical.parquet --split-dir data/processed/fixed_splits --seed 42
-python -m src.baseline.export_split_assignments --split-dir data/processed/fixed_splits --output data/processed/kaggle_split_assignments/split_assignments.parquet
-```
+Reuse the existing split files; do not rerun splitting when preparing a paired treatment experiment. Kaggle training instructions and notebook have been removed because the current baseline was trained and tuned locally.
 
-The Kaggle baseline notebook is `notebooks/kaggle_baseline_fixed_split/baseline_fixed_split.ipynb`. It uses the private canonical dataset plus the split-assignment dataset and aborts unless the train/validation/test hashes match `split_manifest.json`.
+Inference can initially run locally: apply the same `model_text` construction, extract first-token embeddings with the frozen `microsoft/deberta-v3-small` checkpoint, pass embeddings to `xgb_baseline_tuned.json`, and classify using the threshold in `outputs/models/baseline/fixed_split/tuned_xgboost/threshold_meta.json`. The pretrained DeBERTa checkpoint must be downloadable or cached locally. Deployment is optional; after validating local batch inference, the model can be integrated into the existing application/API. The current repository has no dedicated baseline inference service yet.
 
 ### Select training-only audit candidates
 
@@ -195,14 +183,13 @@ The comparison script checks the test-set identity hash and test row count. If e
 |---|---|
 | 5,000 training-only audit candidates | `data/processed/audit_train_sample.parquet` |
 | Nested 1,000 candidate sample | `data/processed/audit_train_sample_1000_from_5000.parquet` |
-| Current 200-record audit checkpoint (JSON) | `outputs/results/audited_train_1000_onecall/audited_records.json` |
-| Current 200-record audit checkpoint (Parquet) | `data/processed/audited_train_1000_onecall_labels.parquet` |
-| Current full treatment training set | `data/processed/fixed_splits/treatment_train.parquet` |
-| Current treatment data summary | `outputs/results/treatment/treatment_dataset_summary_current.json` |
-| Historical baseline metrics | `outputs/results/baseline/full/metrics.json` |
-| Historical 20-label treatment metrics | `outputs/results/treatment/metrics.json` |
+| 5,000 training-only candidates | `data/processed/audit_train_sample.parquet` |
+| Nested 1,000 audit candidates | `data/processed/audit_train_sample_1000_from_5000.parquet` |
+| Audit completion | 0 valid labels from the current four-call attempt; see `outputs/logs/audit_1000_independent_calls.log` |
+| Treatment dataset/model | Not built from the current audit; prior incompatible outputs were removed |
+| Current tuned baseline metrics | `outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json` |
 
-No final API usage or audit metrics summary is available for the 200-record checkpoint. The orchestrator writes these summaries after a run completes.
+The selected candidate samples remain available to resume the audit. Treatment data and models should be regenerated only after valid Judge labels are available.
 
 ## API and dashboard
 

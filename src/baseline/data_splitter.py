@@ -108,6 +108,43 @@ def load_or_create_fixed_splits(
     return train, val, test
 
 
+def load_frozen_split_metadata(
+    split_dir: str | Path,
+    label_column: str = "original_label",
+    random_seed: int = 42,
+    test_size: float = 0.15,
+    val_size: float = 0.15,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Load only identities and labels from verified frozen splits for model runs."""
+    split_path = Path(split_dir)
+    names = ("train", "validation", "test")
+    manifest_path = split_path / "split_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"Frozen split manifest not found: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("random_seed") != random_seed:
+        raise ValueError("Configured seed differs from the frozen split manifest.")
+    if manifest.get("test_size") != test_size or manifest.get("val_size") != val_size:
+        raise ValueError("Configured split ratios differ from the frozen split manifest.")
+
+    columns = ["source", "project", "issue_id", label_column]
+    frames = []
+    for name in names:
+        path = split_path / f"{name}.parquet"
+        if not path.is_file():
+            raise FileNotFoundError(f"Frozen split file not found: {path}")
+        frame = pd.read_parquet(path, columns=columns)
+        if frame[label_column].isna().any():
+            raise ValueError(f"Frozen {name} split contains missing labels.")
+        if len(frame) != manifest.get({"train": "train_size", "validation": "validation_size_records", "test": "test_records"}[name]):
+            raise ValueError(f"Frozen {name} split row count differs from its manifest.")
+        if _identity_digest(frame) != manifest["identity_sha256"][name]:
+            raise ValueError(f"Frozen {name} split identities differ from its manifest.")
+        frames.append(frame)
+    validate_split_disjointness(*frames)
+    return tuple(frames)  # type: ignore[return-value]
+
+
 def apply_split_assignments(
     df: pd.DataFrame,
     assignments_path: str | Path,

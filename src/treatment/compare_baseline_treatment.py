@@ -97,9 +97,9 @@ def compare_baseline_and_treatment(
     summary_file = out_dir / "comparison_summary.json"
     with open(summary_file, "w", encoding="utf-8") as f:
         # Attach audit scale and actual observed API usage when available.
-        audit_metrics_path = Path("outputs/results/audited_train_1000_onecall/audit_metrics.json")
-        audit_usage_path = Path("outputs/results/audited_train_1000_onecall/api_usage.json")
-        treatment_summary_path = Path("outputs/results/treatment/treatment_dataset_summary.json")
+        audit_metrics_path = Path("outputs/results/audited_train_1000_independent_calls/audit_metrics.json")
+        audit_usage_path = Path("outputs/results/audited_train_1000_independent_calls/api_usage.json")
+        treatment_summary_path = Path("outputs/results/treatment/treatment_dataset_summary_current.json")
         context = {}
         for name, path in (("audit", audit_metrics_path), ("api_usage", audit_usage_path), ("treatment_dataset", treatment_summary_path)):
             if path.exists():

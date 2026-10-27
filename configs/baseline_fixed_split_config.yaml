@@ -35,6 +35,7 @@ xgboost:
   early_stopping_rounds: 35
   random_state: 42
   tree_method: "hist"
+  max_bin: 64
   device: "cuda"
 
 shap:
