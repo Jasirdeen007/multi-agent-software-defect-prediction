@@ -191,6 +191,10 @@ The comparison script checks the test-set identity hash and test row count. If e
 
 The selected candidate samples remain available to resume the audit. Treatment data and models should be regenerated only after valid Judge labels are available.
 
+### Shared data files
+
+The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The historical 1,000-row audit output is tracked at `outputs/results/audited_train_1000_onecall/audited_records.json`; it was produced by a single-call four-perspective protocol and is not the current four-separate-call audit, so do not use it as the current treatment labels.
+
 ## API and dashboard
 
 Start the backend:
