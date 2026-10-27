@@ -142,7 +142,7 @@ class BaseAuditAgent:
                 if getattr(exc, "status_code", None) == 400 and "rate_limit" not in error_lower:
                     raise RuntimeError(f"[{self.name}] Provider rejected the request; not retrying a non-transient 400: {exc}") from exc
                 if self.provider == "groq" and ("not found" in error_lower or "does not exist" in error_lower):
-                    print(f"[{self.name}] Model {current_model} unavailable, switching to fallback {self.fallback_model}...")
+                    print(f"[{self.name}] Model {current_model} unavailable, switching to fallback {self.fallback_model}...", flush=True)
                     current_model = self.fallback_model
                 elif attempt >= self.max_retries:
                     raise RuntimeError(f"[{self.name}] Failed after {attempt} attempt(s): {exc}") from exc
@@ -155,7 +155,7 @@ class BaseAuditAgent:
                     match = re.search(r"try again in ([0-9.]+)s", error_lower)
                     retry_after = match.group(1) if match else None
                 wait_time = min(float(retry_after), 60.0) if retry_after else min(2 ** (attempt - 1) + random.uniform(0, 1), 10.0)
-                print(f"[{self.name}] API request failed; retrying in {wait_time:.1f}s ({attempt}/{self.max_retries}): {exc}")
+                print(f"[{self.name}] API request failed; retrying in {wait_time:.1f}s ({attempt}/{self.max_retries}): {exc}", flush=True)
                 await asyncio.sleep(wait_time)
 
         raise RuntimeError(f"[{self.name}] Failed to generate valid JSON response.")

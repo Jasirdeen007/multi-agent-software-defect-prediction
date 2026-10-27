@@ -1,0 +1,397 @@
+{
+  "created_at": "2026-10-27T15:26:13.838732+00:00",
+  "dataset_path": "data/processed/fixed_splits/train.parquet",
+  "sample_path": "data/processed/audit_train_sample_10000.parquet",
+  "sampling_method": "sqrt_project_weighted_stratified_original_label",
+  "sample_size_requested": 10000,
+  "sample_size_actual": 10000,
+  "random_seed": 42,
+  "identity_columns": [
+    "source",
+    "project",
+    "issue_id"
+  ],
+  "strata_columns": [
+    "project",
+    "original_label"
+  ],
+  "preserved_columns": [
+    "issue_id",
+    "source",
+    "project",
+    "title",
+    "description",
+    "component",
+    "severity",
+    "priority",
+    "status",
+    "resolution",
+    "original_label",
+    "label_source",
+    "created_at",
+    "updated_at",
+    "model_text"
+  ],
+  "dataset_rows": 648424,
+  "dataset_unique_projects": 79,
+  "sample_unique_projects": 79,
+  "sample_duplicate_composite_identities": 0,
+  "dataset_distribution": {
+    "source": [
+      {
+        "source": "BUGZILLA",
+        "records": 178201,
+        "percentage": 27.4822
+      },
+      {
+        "source": "GITHUB",
+        "records": 275637,
+        "percentage": 42.5088
+      },
+      {
+        "source": "JIRA",
+        "records": 194586,
+        "percentage": 30.0091
+      }
+    ],
+    "original_label": [
+      {
+        "original_label": "bug",
+        "records": 454130,
+        "percentage": 70.036
+      },
+      {
+        "original_label": "non-bug",
+        "records": 194294,
+        "percentage": 29.964
+      }
+    ],
+    "source_original_label": [
+      {
+        "source": "BUGZILLA",
+        "original_label": "bug",
+        "records": 139900,
+        "percentage": 21.5754
+      },
+      {
+        "source": "BUGZILLA",
+        "original_label": "non-bug",
+        "records": 38301,
+        "percentage": 5.9068
+      },
+      {
+        "source": "GITHUB",
+        "original_label": "bug",
+        "records": 190861,
+        "percentage": 29.4346
+      },
+      {
+        "source": "GITHUB",
+        "original_label": "non-bug",
+        "records": 84776,
+        "percentage": 13.0742
+      },
+      {
+        "source": "JIRA",
+        "original_label": "bug",
+        "records": 123369,
+        "percentage": 19.026
+      },
+      {
+        "source": "JIRA",
+        "original_label": "non-bug",
+        "records": 71217,
+        "percentage": 10.9831
+      }
+    ],
+    "text_length_bucket": [
+      {
+        "text_length_bucket": "0-99",
+        "records": 62372,
+        "percentage": 9.619
+      },
+      {
+        "text_length_bucket": "100-249",
+        "records": 100113,
+        "percentage": 15.4394
+      },
+      {
+        "text_length_bucket": "250-499",
+        "records": 148810,
+        "percentage": 22.9495
+      },
+      {
+        "text_length_bucket": "500-999",
+        "records": 154717,
+        "percentage": 23.8605
+      },
+      {
+        "text_length_bucket": "1000-2499",
+        "records": 118565,
+        "percentage": 18.2851
+      },
+      {
+        "text_length_bucket": "2500-4999",
+        "records": 40555,
+        "percentage": 6.2544
+      },
+      {
+        "text_length_bucket": "5000-9999",
+        "records": 15712,
+        "percentage": 2.4231
+      },
+      {
+        "text_length_bucket": "10000+",
+        "records": 7580,
+        "percentage": 1.169
+      }
+    ],
+    "metadata_missing_bucket": [
+      {
+        "metadata_missing_bucket": "complete",
+        "records": 648424,
+        "percentage": 100.0
+      },
+      {
+        "metadata_missing_bucket": "partially_missing",
+        "records": 0,
+        "percentage": 0.0
+      },
+      {
+        "metadata_missing_bucket": "sparse",
+        "records": 0,
+        "percentage": 0.0
+      }
+    ]
+  },
+  "sample_distribution": {
+    "source": [
+      {
+        "source": "BUGZILLA",
+        "records": 1516,
+        "percentage": 15.16
+      },
+      {
+        "source": "GITHUB",
+        "records": 4595,
+        "percentage": 45.95
+      },
+      {
+        "source": "JIRA",
+        "records": 3889,
+        "percentage": 38.89
+      }
+    ],
+    "original_label": [
+      {
+        "original_label": "bug",
+        "records": 6748,
+        "percentage": 67.48
+      },
+      {
+        "original_label": "non-bug",
+        "records": 3252,
+        "percentage": 32.52
+      }
+    ],
+    "source_original_label": [
+      {
+        "source": "BUGZILLA",
+        "original_label": "bug",
+        "records": 1185,
+        "percentage": 11.85
+      },
+      {
+        "source": "BUGZILLA",
+        "original_label": "non-bug",
+        "records": 331,
+        "percentage": 3.31
+      },
+      {
+        "source": "GITHUB",
+        "original_label": "bug",
+        "records": 3095,
+        "percentage": 30.95
+      },
+      {
+        "source": "GITHUB",
+        "original_label": "non-bug",
+        "records": 1500,
+        "percentage": 15.0
+      },
+      {
+        "source": "JIRA",
+        "original_label": "bug",
+        "records": 2468,
+        "percentage": 24.68
+      },
+      {
+        "source": "JIRA",
+        "original_label": "non-bug",
+        "records": 1421,
+        "percentage": 14.21
+      }
+    ],
+    "text_length_bucket": [
+      {
+        "text_length_bucket": "0-99",
+        "records": 833,
+        "percentage": 8.33
+      },
+      {
+        "text_length_bucket": "100-249",
+        "records": 1508,
+        "percentage": 15.08
+      },
+      {
+        "text_length_bucket": "250-499",
+        "records": 2303,
+        "percentage": 23.03
+      },
+      {
+        "text_length_bucket": "500-999",
+        "records": 2360,
+        "percentage": 23.6
+      },
+      {
+        "text_length_bucket": "1000-2499",
+        "records": 1952,
+        "percentage": 19.52
+      },
+      {
+        "text_length_bucket": "2500-4999",
+        "records": 677,
+        "percentage": 6.77
+      },
+      {
+        "text_length_bucket": "5000-9999",
+        "records": 267,
+        "percentage": 2.67
+      },
+      {
+        "text_length_bucket": "10000+",
+        "records": 100,
+        "percentage": 1.0
+      }
+    ],
+    "metadata_missing_bucket": [
+      {
+        "metadata_missing_bucket": "complete",
+        "records": 10000,
+        "percentage": 100.0
+      },
+      {
+        "metadata_missing_bucket": "partially_missing",
+        "records": 0,
+        "percentage": 0.0
+      },
+      {
+        "metadata_missing_bucket": "sparse",
+        "records": 0,
+        "percentage": 0.0
+      }
+    ]
+  },
+  "top_projects_in_sample": [
+    {
+      "project": "Core",
+      "records": 537
+    },
+    {
+      "project": "ansible",
+      "records": 306
+    },
+    {
+      "project": "vscode",
+      "records": 235
+    },
+    {
+      "project": "mongodb_core_server",
+      "records": 224
+    },
+    {
+      "project": "Platform",
+      "records": 220
+    },
+    {
+      "project": "kubernetes",
+      "records": 217
+    },
+    {
+      "project": "firefox",
+      "records": 211
+    },
+    {
+      "project": "QGIS",
+      "records": 205
+    },
+    {
+      "project": "godot",
+      "records": 204
+    },
+    {
+      "project": "ambari",
+      "records": 191
+    },
+    {
+      "project": "elasticsearch",
+      "records": 186
+    },
+    {
+      "project": "flex",
+      "records": 172
+    },
+    {
+      "project": "symfony",
+      "records": 169
+    },
+    {
+      "project": "server",
+      "records": 162
+    },
+    {
+      "project": "spark",
+      "records": 159
+    },
+    {
+      "project": "hbase",
+      "records": 157
+    },
+    {
+      "project": "zephyr",
+      "records": 156
+    },
+    {
+      "project": "kibana",
+      "records": 155
+    },
+    {
+      "project": "camel",
+      "records": 151
+    },
+    {
+      "project": "flink",
+      "records": 149
+    },
+    {
+      "project": "salt",
+      "records": 149
+    },
+    {
+      "project": "spring-framework",
+      "records": 148
+    },
+    {
+      "project": "hive",
+      "records": 147
+    },
+    {
+      "project": "maria_db_server",
+      "records": 147
+    },
+    {
+      "project": "core",
+      "records": 145
+    }
+  ]
+}
