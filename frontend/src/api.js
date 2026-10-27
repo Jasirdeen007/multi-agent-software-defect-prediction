@@ -1,13 +1,15 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') ?? '';
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000').replace(/\/$/, '');
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 async function request(path, options) {
-  if (!API_BASE) return null;
   const response = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
-  if (!response.ok) throw new Error(`API ${response.status}: ${path}`);
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    throw new Error(body?.detail ?? `API ${response.status}: ${path}`);
+  }
   return response.json();
 }
 
@@ -86,18 +88,19 @@ const demoCases = [
 ];
 
 function predictionFromApi(payload) {
+  const prediction = payload.prediction;
+  const review = payload.review;
   return {
-    label: payload.model_prediction,
-    confidence: Math.round(payload.model_confidence * 100),
-    predictionId: payload.prediction_id,
-    modelVersion: payload.model_version,
-    summary: payload.prediction_summary,
-    reviewRequired: payload.human_review_required,
-    topFeatures: payload.shap_values.map((item) => ({
-      feature: item.feature,
-      weight: Math.abs(item.weight),
-      direction: item.direction,
-    })),
+    label: prediction.label,
+    probabilityBug: prediction.probability_bug,
+    classificationThreshold: prediction.classification_threshold,
+    predictionId: payload.request_id,
+    modelName: prediction.model_name,
+    modelVersion: prediction.model_version,
+    reviewRequired: review.required,
+    reviewReasons: review.reasons,
+    lowConfidenceCheck: review.low_confidence_check,
+    oodCheck: review.ood_check,
   };
 }
 
@@ -109,28 +112,12 @@ export async function getDatasetStats() {
 }
 
 export async function getBaselineReport() {
-  const data = await request('/api/v1/baseline-report').catch(() => null);
-  if (data) return data;
-  await wait(250);
-  return demoBaselineReport;
+  return request('/api/v1/baseline-report');
 }
 
 export async function predictIssue(form) {
-  const data = await request('/api/v1/predictions', { method: 'POST', body: JSON.stringify(form) }).catch(() => null);
-  if (data) return predictionFromApi(data);
-  await wait(450);
-  const input = `${form.title} ${form.description}`.toLowerCase();
-  const defectTerms = /crash|error|fail|broken|exception|regression|incorrect|unable|freeze|cannot/.test(input);
-  return {
-    label: defectTerms ? 'bug' : 'non-bug',
-    confidence: defectTerms ? 84 : 61,
-    modelVersion: 'dashboard-preview',
-    summary: 'Preview response. Connect FastAPI to local model artifacts for production inference.',
-    reviewRequired: !defectTerms,
-    topFeatures: defectTerms
-      ? [{ feature: 'defect language', weight: 0.38, direction: 'bug' }, { feature: 'reproduction detail', weight: 0.21, direction: 'bug' }, { feature: 'failure wording', weight: 0.16, direction: 'bug' }]
-      : [{ feature: 'request wording', weight: 0.31, direction: 'non-bug' }, { feature: 'workflow phrasing', weight: 0.22, direction: 'non-bug' }, { feature: 'low defect signal', weight: 0.14, direction: 'non-bug' }],
-  };
+  const data = await request('/api/v1/predictions', { method: 'POST', body: JSON.stringify(form) });
+  return predictionFromApi(data);
 }
 
 export async function getAuditOverview() {
@@ -170,20 +157,5 @@ export async function getAuditCaseById(id) {
 }
 
 export async function getModelComparison() {
-  const data = await request('/api/v1/model-comparison').catch(() => null);
-  if (data) return data;
-  await wait(250);
-  return {
-    setup: { baselineLabelSource: 'Original BugHub source labels', treatmentLabelSource: 'Agent-audited labels (pending)', testSet: 'Held-out baseline split' },
-    baseline: demoBaselineReport,
-    treatmentStatus: 'pending',
-    metrics: [
-      { key: 'accuracy', label: 'Accuracy', baseline: 0.7852, treatment: null },
-      { key: 'balancedAccuracy', label: 'Balanced Accuracy', baseline: 0.7044, treatment: null },
-      { key: 'macroF1', label: 'Macro F1', baseline: 0.7195, treatment: null },
-      { key: 'rocAuc', label: 'ROC-AUC', baseline: 0.8301, treatment: null },
-      { key: 'mcc', label: 'MCC', baseline: 0.4547, treatment: null },
-      { key: 'brier', label: 'Brier Score', baseline: 0.1483, treatment: null, lowerIsBetter: true },
-    ],
-  };
+  return request('/api/v1/model-comparison');
 }

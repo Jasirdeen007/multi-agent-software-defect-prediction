@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import json
+import math
 from pathlib import Path
-import re
 from typing import Any
+from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-import numpy as np
 import pandas as pd
 from pydantic import BaseModel, Field
 
@@ -46,46 +46,136 @@ class ReviewRequest(BaseModel):
 
 
 # Global caches
-_xgb_booster = None
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+_treatment_booster = None
 _deberta_extractor = None
 
 
-def get_xgb_model():
-    """Lazily loads the trained XGBoost model."""
-    global _xgb_booster
-    if _xgb_booster is None:
-        try:
-            import xgboost as xgb
-            model_path = Path("outputs/models/baseline/full/xgb_baseline.json")
-            if not model_path.exists():
-                model_path = Path("outputs/models/treatment/xgb_treatment.json")
-            if model_path.exists():
-                _xgb_booster = xgb.Booster()
-                _xgb_booster.load_model(str(model_path))
-                print(f"[API] Loaded XGBoost model from {model_path}")
-        except Exception as e:
-            print(f"[API] Error loading XGBoost model: {e}")
-    return _xgb_booster
+def _read_json(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    with path.open("r", encoding="utf-8") as file:
+        value = json.load(file)
+    return value if isinstance(value, dict) else None
+
+
+def get_treatment_model():
+    """Load only the treatment classifier for user-facing inference."""
+    global _treatment_booster
+    if _treatment_booster is None:
+        readiness = get_treatment_readiness()
+        if not readiness["ready"]:
+            raise RuntimeError(readiness["reason"])
+        import xgboost as xgb
+
+        model_path = PROJECT_ROOT / "outputs/models/treatment/xgb_treatment.json"
+        if not model_path.exists():
+            raise FileNotFoundError("Treatment XGBoost artifact is missing.")
+        _treatment_booster = xgb.Booster()
+        _treatment_booster.load_model(str(model_path))
+        print(f"[API] Loaded treatment XGBoost model from {model_path}")
+    return _treatment_booster
+
+
+def get_treatment_threshold() -> float:
+    metadata_path = PROJECT_ROOT / "outputs/models/treatment/threshold_meta.json"
+    metadata = _read_json(metadata_path)
+    threshold = metadata.get("optimal_threshold") if metadata else None
+    if not isinstance(threshold, (int, float)) or not math.isfinite(threshold) or not 0 < threshold < 1:
+        raise ValueError("Treatment classification threshold metadata is missing or invalid.")
+    return float(threshold)
+
+
+def get_treatment_readiness() -> dict[str, Any]:
+    current_summary_path = PROJECT_ROOT / "outputs/results/treatment/treatment_dataset_summary_current.json"
+    summary_path = current_summary_path if current_summary_path.exists() else PROJECT_ROOT / "outputs/results/treatment/treatment_dataset_summary.json"
+    metrics_path = PROJECT_ROOT / "outputs/results/treatment/metrics.json"
+    model_path = PROJECT_ROOT / "outputs/models/treatment/xgb_treatment.json"
+    threshold_path = PROJECT_ROOT / "outputs/models/treatment/threshold_meta.json"
+    summary = _read_json(summary_path) or {}
+    audit_methods = summary.get("audit_methods") or {}
+
+    if audit_methods.get("single_model_four_perspective_one_call"):
+        return {
+            "ready": False,
+            "status": "blocked",
+            "reason": "The retained treatment artifact used one model call for four perspectives; the repository protocol requires four separate role calls. Rebuild the audit and treatment artifacts before inference.",
+            "auditMethod": "single_model_four_perspective_one_call",
+        }
+    audited_records = summary.get("audited_records")
+    verified_records = audit_methods.get("four_separate_agent_calls")
+    protocol_verified = (
+        summary.get("audit_protocol") == "four_separate_role_calls"
+        or (verified_records == audited_records and isinstance(verified_records, int) and verified_records > 0 and len(audit_methods) == 1)
+    )
+    if not protocol_verified:
+        return {
+            "ready": False,
+            "status": "blocked",
+            "reason": "Treatment audit provenance does not verify the required four separate role calls.",
+            "auditMethod": None,
+        }
+    if not metrics_path.exists() or not model_path.exists() or not threshold_path.exists():
+        return {
+            "ready": False,
+            "status": "unavailable",
+            "reason": "Treatment evaluation metrics or model artifact are missing.",
+            "auditMethod": "four_separate_role_calls",
+        }
+    treatment_metrics = _read_json(metrics_path) or {}
+    baseline_metrics = _read_json(PROJECT_ROOT / "outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json") or {}
+    if not baseline_metrics.get("test_identity_sha256") or treatment_metrics.get("test_identity_sha256") != baseline_metrics.get("test_identity_sha256"):
+        return {
+            "ready": False,
+            "status": "blocked",
+            "reason": "Treatment evaluation does not verify the current tuned baseline's held-out test identities.",
+            "auditMethod": "four_separate_role_calls",
+        }
+    return {
+        "ready": True,
+        "status": "completed",
+        "reason": None,
+        "auditMethod": "four_separate_role_calls",
+    }
 
 
 def get_deberta_extractor():
     """Lazily loads the DeBERTa embedding extractor."""
     global _deberta_extractor
     if _deberta_extractor is None:
-        try:
-            from src.baseline.embedding_extractor import DebertaEmbeddingExtractor
-            _deberta_extractor = DebertaEmbeddingExtractor(
-                model_name="microsoft/deberta-v3-small",
-                max_length=256,
-                batch_size=1,
-                use_fp16=True,
-                pooling="cls",
-                device="auto",
-            )
-            print("[API] Loaded DeBERTa-v3 feature extractor.")
-        except Exception as e:
-            print(f"[API] DeBERTa loader note: {e}")
+        import yaml
+        from src.baseline.embedding_extractor import DebertaEmbeddingExtractor
+
+        config_path = PROJECT_ROOT / "configs/baseline_config.yaml"
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        model_config = config["model"]
+        _deberta_extractor = DebertaEmbeddingExtractor(
+            model_name=model_config["name"],
+            max_length=model_config["max_length"],
+            batch_size=1,
+            use_fp16=model_config.get("use_fp16", True),
+            pooling=model_config["pooling"],
+            device="auto",
+        )
+        print("[API] Loaded DeBERTa-v3 feature extractor.")
     return _deberta_extractor
+
+
+def predict_treatment_probability(model_text: str) -> float:
+    """Return the model's class-1 probability after validating embedding width."""
+    import xgboost as xgb
+
+    booster = get_treatment_model()
+    extractor = get_deberta_extractor()
+    embeddings = extractor.extract_embeddings([model_text], split_name="inference")
+    if embeddings.ndim != 2 or embeddings.shape[0] != 1:
+        raise ValueError("DeBERTa returned an invalid embedding shape.")
+    if booster.num_features() != embeddings.shape[1]:
+        raise ValueError("Treatment model feature width does not match the DeBERTa embedding.")
+    probability = float(booster.predict(xgb.DMatrix(embeddings))[0])
+    if not math.isfinite(probability) or not 0 <= probability <= 1:
+        raise ValueError("Treatment model returned an invalid class probability.")
+    return probability
 
 
 DATASET_STATS: dict[str, Any] = {
@@ -121,61 +211,34 @@ DATASET_STATS: dict[str, Any] = {
 
 
 def load_baseline_report() -> dict[str, Any]:
-    metrics_path = Path("outputs/results/baseline/full/metrics.json")
-    threshold_path = Path("outputs/models/baseline/full/threshold_meta.json")
-    threshold = 0.52
-    if threshold_path.exists():
-        try:
-            with open(threshold_path, "r", encoding="utf-8") as f:
-                threshold = json.load(f).get("optimal_threshold", 0.52)
-        except Exception:
-            pass
-
+    metrics_path = PROJECT_ROOT / "outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json"
+    threshold_path = PROJECT_ROOT / "outputs/models/baseline/fixed_split/tuned_xgboost/threshold_meta.json"
+    raw = _read_json(metrics_path) or {}
+    threshold_meta = _read_json(threshold_path) or {}
     metrics = {
-        "accuracy": 0.7852,
-        "balancedAccuracy": 0.7044,
-        "macroF1": 0.7195,
-        "rocAuc": 0.8301,
-        "mcc": 0.4547,
-        "brierScore": 0.1483,
+        "accuracy": raw.get("accuracy"),
+        "balancedAccuracy": raw.get("balanced_accuracy"),
+        "macroF1": raw.get("macro_f1"),
+        "rocAuc": raw.get("roc_auc"),
+        "mcc": raw.get("matthews_corrcoef"),
+        "brierScore": raw.get("brier_score"),
     }
-    if metrics_path.exists():
-        try:
-            with open(metrics_path, "r", encoding="utf-8") as f:
-                raw = json.load(f)
-                metrics = {
-                    "accuracy": raw.get("accuracy", 0.7852),
-                    "balancedAccuracy": raw.get("balanced_accuracy", 0.7044),
-                    "macroF1": raw.get("macro_f1", 0.7195),
-                    "rocAuc": raw.get("roc_auc", 0.8301),
-                    "mcc": raw.get("matthews_corrcoef", 0.4547),
-                    "brierScore": raw.get("brier_score", 0.1483),
-                }
-        except Exception:
-            pass
 
     return {
-        "status": "completed",
+        "status": "completed" if raw else "unavailable",
         "labelSource": "Original BugHub source labels",
-        "model": "DeBERTa-v3-small frozen embeddings + Regularized XGBoost",
+        "model": "DeBERTa-v3-small frozen embeddings + validation-tuned regularized XGBoost",
         "inputFeatures": ["model_text"],
         "trackingFields": ["source", "project", "issue_id"],
         "target": "original_label",
         "split": {
-            "train": 35000,
-            "validation": 7500,
-            "test": 7500,
-            "randomSeed": 42,
+            "train": raw.get("train_records"),
+            "validation": raw.get("validation_records"),
+            "test": raw.get("test_records"),
         },
-        "threshold": threshold,
+        "threshold": raw.get("optimal_threshold", threshold_meta.get("optimal_threshold")),
         "metrics": metrics,
-        "artifacts": [
-            "outputs/models/baseline/full/xgb_baseline.json",
-            "outputs/models/baseline/full/threshold_meta.json",
-            "outputs/results/baseline/full/metrics.json",
-            "outputs/results/baseline/full/classification_report.txt",
-            "outputs/figures/baseline/",
-        ],
+        "testIdentity": raw.get("test_identity_sha256"),
     }
 
 
@@ -187,14 +250,15 @@ def health() -> dict[str, str]:
 @app.get("/api/v1/project-status")
 def project_status() -> dict[str, Any]:
     # Check what stages exist on disk
-    has_treatment = Path("outputs/results/treatment/metrics.json").exists()
+    treatment_readiness = get_treatment_readiness()
+    has_treatment = treatment_readiness["ready"]
     has_comparison = Path("outputs/results/comparison/comparison_summary.json").exists()
     has_audited = Path("data/processed/audited_labels.parquet").exists()
     has_sample = Path("data/processed/audit_sample.parquet").exists()
     has_kg = Path("outputs/knowledge_graph/kg_audit_sample.json").exists()
 
     return {
-        "currentStage": "Multi-Agent Auditing, Knowledge Graph, and Treatment Experiments Completed",
+        "currentStage": "Treatment audit protocol requires rebuild" if treatment_readiness["status"] == "blocked" else "Baseline and treatment experiments completed",
         "stages": [
             {"name": "Canonical dataset (926,461 issues)", "status": "completed"},
             {"name": "EDA and validation", "status": "completed"},
@@ -202,7 +266,7 @@ def project_status() -> dict[str, Any]:
             {"name": "Selective audit sampling (5,000 stratified issues)", "status": "completed" if has_sample else "pending"},
             {"name": "Knowledge Graph relational ontology & evidence layer", "status": "completed" if has_kg else "pending"},
             {"name": "Multi-agent audit council (Policy, Data, Pattern, Judge)", "status": "completed" if has_audited else "pending"},
-            {"name": "Audited-label treatment model", "status": "completed" if has_treatment else "in-progress"},
+            {"name": "Audited-label treatment model", "status": "completed" if has_treatment else treatment_readiness["status"]},
             {"name": "Baseline vs treatment comparative evaluation", "status": "completed" if has_comparison else "in-progress"},
         ],
     }
@@ -221,85 +285,46 @@ def baseline_report() -> dict[str, Any]:
 
 @app.post("/api/v1/predictions")
 def predict_issue(payload: PredictionRequest) -> dict[str, Any]:
-    """Scores a defect report using DeBERTa-v3 contextual representation and regularized XGBoost."""
-    model_text = f"{payload.title} {payload.description}".strip()
-    clean_text = model_text.lower()
-    
-    # Fast lexical / semantic defect signal scoring
-    defect_patterns = [
-        (r"\b(crash|fatal|segfault|sigsegv|panic)\b", 0.42, "Critical failure language"),
-        (r"\b(exception|error|failed|nullpointer|traceback|stacktrace)\b", 0.35, "Exception pattern"),
-        (r"\b(regression|broken|corrupt|leak|freeze|deadlock)\b", 0.28, "Regression / corruption"),
-        (r"\b(reproduce|steps to reproduce|expected behavior|actual behavior)\b", 0.25, "Bug reproduction structure"),
-        (r"\b(incorrect|wrong|unexpected|discrepancy)\b", 0.18, "Functional deviation"),
-    ]
-    non_defect_patterns = [
-        (r"\b(feature|enhancement|request|proposal|wishlist)\b", -0.38, "Feature enhancement terms"),
-        (r"\b(documentation|docs|typo|readme|guide)\b", -0.28, "Documentation update"),
-        (r"\b(refactor|cleanup|optimize|formatting)\b", -0.22, "Maintenance / Refactoring"),
-        (r"\b(add support|please support|would like to)\b", -0.25, "Feature suggestion"),
-    ]
+    """Predict with the treatment model; never substitute heuristic scores."""
+    title = " ".join(payload.title.split())
+    description = " ".join(payload.description.split())
+    if not title or not description:
+        raise HTTPException(status_code=422, detail="Title and description must contain text.")
 
-    # Attempt real model inference
-    booster = get_xgb_model()
-    extractor = get_deberta_extractor()
-    prob = None
+    model_text = f"{title} {description}"
+    readiness = get_treatment_readiness()
+    if not readiness["ready"]:
+        raise HTTPException(status_code=503, detail=readiness["reason"])
+    try:
+        probability_bug = predict_treatment_probability(model_text)
+        threshold = get_treatment_threshold()
+    except Exception as error:
+        print(f"[API] Treatment inference unavailable: {error}")
+        raise HTTPException(
+            status_code=503,
+            detail="Treatment inference is unavailable. Verify the treatment model and DeBERTa artifacts.",
+        ) from error
 
-    if booster is not None and extractor is not None:
-        try:
-            import xgboost as xgb
-            emb = extractor.extract_embeddings([model_text], split_name="inference")
-            dmat = xgb.DMatrix(emb)
-            prob = float(booster.predict(dmat)[0])
-        except Exception as e:
-            print(f"[API] Neural inference note: {e}")
-
-
-    # Fallback / calibrated scoring if GPU/neural pipeline is warming up
-    if prob is None:
-        logit = 0.0
-        for pattern, weight, _ in defect_patterns:
-            if re.search(pattern, clean_text):
-                logit += weight
-        for pattern, weight, _ in non_defect_patterns:
-            if re.search(pattern, clean_text):
-                logit += weight
-        
-        # Base prior from canonical dataset (~70% bug prior)
-        base_logit = 0.85
-        prob = 1.0 / (1.0 + np.exp(-(base_logit + logit * 3.0)))
-
-    # Optimal calibrated threshold from validation split (0.52)
-    threshold = 0.52
-    is_bug = bool(prob >= threshold)
-    confidence = float(prob if is_bug else (1.0 - prob))
-
-    # Compute top contributing features
-    shap_features = []
-    for pattern, weight, label in defect_patterns:
-        if re.search(pattern, clean_text):
-            shap_features.append({"feature": label, "weight": abs(weight), "direction": "bug"})
-    for pattern, weight, label in non_defect_patterns:
-        if re.search(pattern, clean_text):
-            shap_features.append({"feature": label, "weight": abs(weight), "direction": "non-bug"})
-
-    if not shap_features:
-        shap_features = [
-            {"feature": "Semantic issue representation", "weight": 0.22, "direction": "bug" if is_bug else "non-bug"},
-            {"feature": "Textual context complexity", "weight": 0.15, "direction": "bug"},
-        ]
-
+    class_id = 1 if probability_bug >= threshold else 0
+    label = "bug" if class_id == 1 else "non-bug"
     return {
-        "prediction_id": f"sdp-{abs(hash(clean_text)) % 1000000:06d}",
-        "model_version": "deberta-v3-small + xgboost-hist",
-        "model_prediction": "bug" if is_bug else "non-bug",
-        "model_confidence": round(confidence, 4),
-        "prediction_summary": (
-            f"Model classified issue as {('BUG' if is_bug else 'NON-BUG')} with {confidence*100:.1f}% confidence "
-            f"(calibrated probability = {prob:.3f}, optimal threshold = {threshold:.2f})."
-        ),
-        "shap_values": sorted(shap_features, key=lambda x: x["weight"], reverse=True)[:5],
-        "human_review_required": bool(confidence < 0.65),
+        "request_id": str(uuid4()),
+        "prediction": {
+            "label": label,
+            "class_id": class_id,
+            "probability_bug": round(probability_bug, 6),
+            "classification_threshold": threshold,
+            "model_name": "treatment",
+            "model_version": "outputs/models/treatment/xgb_treatment.json",
+        },
+        "review": {
+            "required": False,
+            "reasons": [],
+            "ood_suspected": False,
+            "low_confidence_check": "disabled",
+            "ood_check": "disabled",
+        },
+        "status": "completed",
     }
 
 
@@ -523,16 +548,13 @@ def audit_case_detail(case_id: str) -> dict[str, Any]:
 def model_comparison() -> dict[str, Any]:
     """Returns baseline vs treatment comparative metrics."""
     base_rep = load_baseline_report()
-    treat_path = Path("outputs/results/treatment/metrics.json")
-    comp_path = Path("outputs/results/comparison/comparison_summary.json")
-
-    treatment_metrics = None
-    if treat_path.exists():
-        try:
-            with open(treat_path, "r", encoding="utf-8") as f:
-                treatment_metrics = json.load(f)
-        except Exception as e:
-            print(f"[API] Error loading treatment metrics: {e}")
+    readiness = get_treatment_readiness()
+    recorded_metrics = _read_json(PROJECT_ROOT / "outputs/results/treatment/metrics.json") or {}
+    treatment_metrics = recorded_metrics if readiness["ready"] else None
+    treatment_context = _read_json(PROJECT_ROOT / "outputs/results/treatment/treatment_dataset_summary.json") or {}
+    baseline_identity = base_rep.get("testIdentity")
+    treatment_identity = treatment_metrics.get("test_identity_sha256") if treatment_metrics else None
+    same_test_split = bool(baseline_identity and baseline_identity == treatment_identity)
 
     metrics_list = [
         {"key": "accuracy", "label": "Accuracy", "baseline": base_rep["metrics"]["accuracy"], "treatment": treatment_metrics.get("accuracy") if treatment_metrics else None},
@@ -546,11 +568,22 @@ def model_comparison() -> dict[str, Any]:
     return {
         "setup": {
             "baselineLabelSource": "Original BugHub source labels",
-            "treatmentLabelSource": "Multi-Agent Audited labels",
+            "treatmentLabelSource": treatment_context.get("label_policy", "Agent-audited training labels"),
             "testSet": "Held-out test split (Seed 42)",
+            "sameTestSplit": same_test_split,
         },
         "baseline": base_rep,
-        "treatmentStatus": "completed" if treatment_metrics else "pending",
+        "treatment": {
+            "status": readiness["status"],
+            "reason": readiness["reason"],
+            "auditMethod": readiness["auditMethod"],
+            "threshold": treatment_metrics.get("optimal_threshold") if treatment_metrics else None,
+            "recordedAuditedRecords": treatment_context.get("audited_records"),
+            "recordedLabelChanges": treatment_context.get("label_changes"),
+            "trainingRecords": treatment_context.get("training_records"),
+        },
+        "treatmentStatus": readiness["status"],
+        "comparisonStatus": "comparable" if same_test_split else "protocol_blocked" if readiness["status"] == "blocked" else "test_split_mismatch",
         "metrics": metrics_list,
     }
 

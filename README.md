@@ -37,8 +37,8 @@ flowchart TD
 | Knowledge Graph | Rebuilt from the 648,424 frozen training rows only. The audit retriever now reads this split and excludes each target issue from its own label-derived priors. Artifacts are under `outputs/knowledge_graph/train_only/`. |
 | Audit sampling | 5,000 training-only candidates across 79 projects; a nested, stratified 1,000-record sample was selected. |
 | Agent audit | The new runner is configured for 1,000 unique training-only candidates and four separate role calls. The first attempt produced **0 audited labels**: Gemini returned HTTP 403 stating its free tier is unavailable for the supplied project. The earlier audit outputs from 20-record and 200-record protocols have been removed because they do not meet the current four-separate-call audit protocol. |
-| Treatment dataset | To be rebuilt after the new 1,000-record audit completes: full training split, Judge labels for audited rows, original labels elsewhere. |
-| Paired treatment training/evaluation | Pending audit completion and treatment dataset rebuild. No current baseline-versus-treatment conclusion is available. |
+| Treatment dataset | Historical one-call treatment artifacts are present, but they do not meet the current four-separate-call audit protocol and are blocked from inference/comparison. Rebuild after the valid audit completes. |
+| Paired treatment training/evaluation | No valid current baseline-versus-treatment conclusion is available. The dashboard excludes the historical one-call treatment metrics. |
 | Application | FastAPI backend and React frontend are present; production readiness is a separate task. |
 
 ### Current audit and treatment counts
@@ -186,7 +186,7 @@ The comparison script checks the test-set identity hash and test row count. If e
 | 5,000 training-only candidates | `data/processed/audit_train_sample.parquet` |
 | Nested 1,000 audit candidates | `data/processed/audit_train_sample_1000_from_5000.parquet` |
 | Audit completion | 0 valid labels from the current four-call attempt; see `outputs/logs/audit_1000_independent_calls.log` |
-| Treatment dataset/model | Not built from the current audit; prior incompatible outputs were removed |
+| Treatment dataset/model | Historical incompatible artifacts are retained under `outputs/results/treatment/` and `outputs/models/treatment/`; they are not accepted by the dashboard |
 | Current tuned baseline metrics | `outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json` |
 
 The selected candidate samples remain available to resume the audit. Treatment data and models should be regenerated only after valid Judge labels are available.
@@ -196,18 +196,18 @@ The selected candidate samples remain available to resume the audit. Treatment d
 Start the backend:
 
 ```powershell
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8001
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 Start the frontend in another shell:
 
 ```powershell
 cd frontend
-$env:VITE_API_BASE_URL="http://127.0.0.1:8001"
-npm run dev -- --host 127.0.0.1
+npm ci
+npm run dev
 ```
 
-The API includes health, project status, dataset/baseline reports, audit overview/cases, model comparison, predictions, and review endpoints. OpenAPI documentation is available at `http://127.0.0.1:8001/docs`; the frontend usually serves at `http://127.0.0.1:5173/`.
+The frontend defaults to the API at `http://127.0.0.1:8000`; override `VITE_API_BASE_URL` when using another port. OpenAPI documentation is available at `http://127.0.0.1:8000/docs`; the frontend usually serves at `http://127.0.0.1:5173/`. Interactive prediction returns an explicit unavailable response until the treatment audit records verify four separate role calls and the evaluated test identities match the current tuned baseline. Low-confidence review and OOD detection remain disabled until validated thresholds are available.
 
 ## Data safety and reproducibility rules
 
