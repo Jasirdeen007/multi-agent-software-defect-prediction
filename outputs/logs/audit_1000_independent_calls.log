@@ -1,0 +1,1168 @@
+Loading data/processed/audit_train_sample_1000_from_5000.parquet for audit...
+Verified all 1,000 audit candidates belong to frozen training data.
+Starting multi-agent audit on 1000 issues (batch size = 2)...
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 2.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.8s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.8s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.3s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.9s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.7s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.1s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.4s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.4s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [pattern_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.2s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[data_agent] API request failed; retrying in 1.5s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.6s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.3s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.6s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[pattern_agent] API request failed; retrying in 1.7s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.5s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 2.0s (1/2): Connection error.
+[data_agent] API request failed; retrying in 1.0s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[policy_agent] API request failed; retrying in 1.1s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [policy_agent] Failed after 2 attempt(s): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[Warning] Failed to audit issue: [data_agent] Failed after 2 attempt(s): Connection error.
+Audited 0/1000 issues...
+[policy_agent] API request failed; retrying in 1.0s (1/2): Gemini connection error: [WinError 10013] An attempt was made to access a socket in a way forbidden by its access permissions
+[data_agent] API request failed; retrying in 1.9s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.
+[pattern_agent] API request failed; retrying in 1.2s (1/2): Connection error.

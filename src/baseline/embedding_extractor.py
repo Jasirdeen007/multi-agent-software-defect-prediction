@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Literal
 
 import numpy as np
+import pyarrow.parquet as pq
 import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
@@ -27,7 +29,6 @@ class DebertaEmbeddingExtractor:
     def __init__(
         self,
         model_name: str = "microsoft/deberta-v3-small",
-        adapter_path: str | Path | None = None,
         max_length: int = 256,
         batch_size: int = 32,
         use_fp16: bool = True,
@@ -35,7 +36,6 @@ class DebertaEmbeddingExtractor:
         device: str = "auto",
     ):
         self.model_name = model_name
-        self.adapter_path = adapter_path
         self.max_length = max_length
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
@@ -45,31 +45,12 @@ class DebertaEmbeddingExtractor:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
             self.device = torch.device(device)
+            if self.device.type == "cuda" and not torch.cuda.is_available():
+                raise RuntimeError("CUDA was requested but is unavailable; refusing to fall back to CPU.")
 
-        # Check if model_name itself is an adapter directory or if adapter_path is provided
-        eff_adapter = None
-        if adapter_path and Path(adapter_path).exists():
-            eff_adapter = Path(adapter_path)
-        elif Path(model_name).is_dir() and (Path(model_name) / "adapter_config.json").exists():
-            eff_adapter = Path(model_name)
-
-        if eff_adapter is not None:
-            import json
-            from peft import PeftModel
-            from transformers import AutoModelForSequenceClassification
-
-            with open(eff_adapter / "adapter_config.json", "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-            base_model_name = cfg.get("base_model_name_or_path", "microsoft/deberta-v3-small")
-            print(f"Loading base model '{base_model_name}' with LoRA adapter from '{eff_adapter}' on {self.device} (FP16={use_fp16})...")
-            self.tokenizer = AutoTokenizer.from_pretrained(eff_adapter)
-            base_model = AutoModelForSequenceClassification.from_pretrained(base_model_name, num_labels=2)
-            peft_model = PeftModel.from_pretrained(base_model, str(eff_adapter))
-            self.model = peft_model.base_model.model.deberta
-        else:
-            print(f"Loading DeBERTa model: {model_name} on {self.device} (FP16={use_fp16})...")
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModel.from_pretrained(model_name)
+        print(f"Loading DeBERTa model: {model_name} on {self.device} (FP16={use_fp16})...")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
 
         if self.use_fp16 and self.device.type == "cuda":
             self.model = self.model.half()
@@ -126,6 +107,161 @@ class DebertaEmbeddingExtractor:
         print(f"Completed {split_name}: shape {stacked.shape}, dtype={stacked.dtype}")
         return stacked
 
+    def extract_embeddings_to_memmap(
+        self, texts: list[str], cache_path: str | Path, split_name: str = "dataset"
+    ) -> np.ndarray:
+        """Extract batches directly to disk so large splits do not need a RAM-sized copy."""
+        path = Path(cache_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        state_path = path.with_suffix(path.suffix + ".progress.json")
+        hidden_size = int(self.model.config.hidden_size)
+        signature = {
+            "model": self.model_name,
+            "rows": len(texts),
+            "max_length": self.max_length,
+            "pooling": self.pooling,
+            "hidden_size": hidden_size,
+        }
+
+        done = 0
+        if path.exists() and state_path.exists():
+            try:
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                if all(state.get(key) == value for key, value in signature.items()):
+                    if state.get("complete"):
+                        return np.load(path, mmap_mode="r")
+                    done = int(state.get("rows_done", 0))
+                    matrix = np.load(path, mmap_mode="r+")
+                else:
+                    path.unlink()
+                    state_path.unlink()
+                    matrix = np.lib.format.open_memmap(
+                        path, mode="w+", dtype=np.float32, shape=(len(texts), hidden_size)
+                    )
+            except (OSError, ValueError, json.JSONDecodeError):
+                path.unlink(missing_ok=True)
+                state_path.unlink(missing_ok=True)
+                matrix = np.lib.format.open_memmap(
+                    path, mode="w+", dtype=np.float32, shape=(len(texts), hidden_size)
+                )
+        else:
+            path.unlink(missing_ok=True)
+            state_path.unlink(missing_ok=True)
+            matrix = np.lib.format.open_memmap(
+                path, mode="w+", dtype=np.float32, shape=(len(texts), hidden_size)
+            )
+
+        state = {**signature, "rows_done": done, "complete": False}
+        micro_batch = self.batch_size
+        checkpoint_rows = max(micro_batch, micro_batch * 100)
+        for start in range(done, len(texts), micro_batch):
+            end = min(start + micro_batch, len(texts))
+            batch = self._collate_fn(texts[start:end])
+            input_ids = batch["input_ids"].to(self.device)
+            attention_mask = batch["attention_mask"].to(self.device)
+            with torch.inference_mode():
+                outputs = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                hidden = outputs.last_hidden_state
+                if self.pooling == "cls":
+                    vectors = hidden[:, 0, :]
+                else:
+                    mask = attention_mask.unsqueeze(-1).expand(hidden.size()).float()
+                    vectors = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
+            matrix[start:end] = vectors.cpu().float().numpy()
+            if end % checkpoint_rows < micro_batch or end == len(texts):
+                matrix.flush()
+                state.update({"rows_done": end, "complete": False})
+                state_path.write_text(json.dumps(state), encoding="utf-8")
+                print(f"{split_name}: {end:,}/{len(texts):,}", flush=True)
+
+        matrix.flush()
+        state.update({"rows_done": len(texts), "complete": True})
+        state_path.write_text(json.dumps(state), encoding="utf-8")
+        return np.load(path, mmap_mode="r")
+
+    def extract_parquet_to_memmap(
+        self,
+        parquet_path: str | Path,
+        text_column: str,
+        cache_path: str | Path,
+        split_name: str,
+        force_recompute: bool = False,
+    ) -> np.ndarray:
+        """Stream one split's text from Parquet and checkpoint embeddings to disk."""
+        source = Path(parquet_path)
+        path = Path(cache_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        state_path = path.with_suffix(path.suffix + ".progress.json")
+        parquet = pq.ParquetFile(source)
+        rows = parquet.metadata.num_rows
+        hidden_size = int(self.model.config.hidden_size)
+        signature = {
+            "model": self.model_name,
+            "rows": rows,
+            "max_length": self.max_length,
+            "pooling": self.pooling,
+            "hidden_size": hidden_size,
+            "source_bytes": source.stat().st_size,
+            "source_mtime_ns": source.stat().st_mtime_ns,
+        }
+        done = 0
+        if not force_recompute and path.exists() and state_path.exists():
+            try:
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                if all(state.get(key) == value for key, value in signature.items()):
+                    if state.get("complete"):
+                        return np.load(path, mmap_mode="r")
+                    done = int(state.get("rows_done", 0))
+                    matrix = np.load(path, mmap_mode="r+")
+                else:
+                    done = 0
+                    matrix = np.lib.format.open_memmap(path, mode="w+", dtype=np.float32, shape=(rows, hidden_size))
+            except (OSError, ValueError, json.JSONDecodeError):
+                done = 0
+                matrix = np.lib.format.open_memmap(path, mode="w+", dtype=np.float32, shape=(rows, hidden_size))
+        else:
+            done = 0
+            matrix = np.lib.format.open_memmap(path, mode="w+", dtype=np.float32, shape=(rows, hidden_size))
+
+        state = {**signature, "rows_done": done, "complete": False}
+        cursor = 0
+        stream_batch_rows = max(256, self.batch_size)
+        for record_batch in parquet.iter_batches(columns=[text_column], batch_size=stream_batch_rows):
+            texts = record_batch.column(0).to_pylist()
+            block_end = cursor + len(texts)
+            if block_end <= done:
+                cursor = block_end
+                continue
+            offset = max(0, done - cursor)
+            for local_start in range(offset, len(texts), self.batch_size):
+                local_end = min(local_start + self.batch_size, len(texts))
+                start, end = cursor + local_start, cursor + local_end
+                batch = self._collate_fn(texts[local_start:local_end])
+                input_ids = batch["input_ids"].to(self.device)
+                attention_mask = batch["attention_mask"].to(self.device)
+                with torch.inference_mode():
+                    output = self.model(input_ids=input_ids, attention_mask=attention_mask)
+                    hidden = output.last_hidden_state
+                    if self.pooling == "cls":
+                        vectors = hidden[:, 0, :]
+                    else:
+                        mask = attention_mask.unsqueeze(-1).expand(hidden.size()).float()
+                        vectors = (hidden * mask).sum(1) / mask.sum(1).clamp(min=1e-9)
+                matrix[start:end] = vectors.cpu().float().numpy()
+            cursor = block_end
+            matrix.flush()
+            state.update({"rows_done": cursor, "complete": False})
+            state_path.write_text(json.dumps(state), encoding="utf-8")
+            if cursor % 10_000 < stream_batch_rows or cursor == rows:
+                print(f"{split_name}: {cursor:,}/{rows:,}", flush=True)
+
+        if cursor != rows:
+            raise RuntimeError(f"Parquet stream read {cursor} rows, expected {rows} for {split_name}.")
+        matrix.flush()
+        state.update({"rows_done": rows, "complete": True})
+        state_path.write_text(json.dumps(state), encoding="utf-8")
+        return np.load(path, mmap_mode="r")
+
 
 def get_or_extract_embeddings(
     extractor: DebertaEmbeddingExtractor,
@@ -135,32 +271,66 @@ def get_or_extract_embeddings(
     force_recompute: bool = False,
 ) -> np.ndarray:
     cache_file = Path(cache_path)
+    state_file = cache_file.with_suffix(cache_file.suffix + ".progress.json")
     if cache_file.exists() and not force_recompute:
-        print(f"Found cached embeddings for {split_name} at: {cache_file}")
-        embeddings = np.load(cache_file)
-        if len(embeddings) == len(texts):
-            print(f"Loaded {len(embeddings):,} embeddings from cache (dim={embeddings.shape[1]}).")
-            return embeddings
-        else:
-            print(f"Cache size mismatch ({len(embeddings)} vs expected {len(texts)}). Recomputing...")
+        try:
+            embeddings = np.load(cache_file, mmap_mode="r")
+            if len(embeddings) == len(texts):
+                print(f"Loaded {len(embeddings):,} cached embeddings from: {cache_file}")
+                return embeddings
+            print(f"Cache size mismatch ({len(embeddings)} vs expected {len(texts)}); recomputing.")
+        except (OSError, ValueError):
+            print(f"Invalid embedding cache at {cache_file}; recomputing.")
+    if force_recompute:
+        cache_file.unlink(missing_ok=True)
+        state_file.unlink(missing_ok=True)
+    return extractor.extract_embeddings_to_memmap(texts, cache_file, split_name=split_name)
 
-    cache_file.parent.mkdir(parents=True, exist_ok=True)
-    embeddings = extractor.extract_embeddings(texts, split_name=split_name)
-    np.save(cache_file, embeddings)
-    print(f"Saved {split_name} embeddings to: {cache_file}")
-    return embeddings
+
+def get_or_extract_parquet_embeddings(
+    extractor: DebertaEmbeddingExtractor,
+    parquet_path: str | Path,
+    text_column: str,
+    cache_path: str | Path,
+    split_name: str,
+    force_recompute: bool = False,
+) -> np.ndarray:
+    cache_file = Path(cache_path)
+    state_file = cache_file.with_suffix(cache_file.suffix + ".progress.json")
+    if force_recompute:
+        cache_file.unlink(missing_ok=True)
+        state_file.unlink(missing_ok=True)
+    elif cache_file.exists() and state_file.exists():
+        try:
+            state = json.loads(state_file.read_text(encoding="utf-8"))
+            source = Path(parquet_path)
+            expected_rows = pq.ParquetFile(source).metadata.num_rows
+            if (
+                state.get("complete")
+                and state.get("model") == extractor.model_name
+                and state.get("rows") == expected_rows
+                and state.get("max_length") == extractor.max_length
+                and state.get("pooling") == extractor.pooling
+                and state.get("source_bytes") == source.stat().st_size
+                and state.get("source_mtime_ns") == source.stat().st_mtime_ns
+            ):
+                return np.load(cache_file, mmap_mode="r")
+        except (OSError, ValueError, json.JSONDecodeError):
+            pass
+    return extractor.extract_parquet_to_memmap(
+        parquet_path, text_column, cache_file, split_name, force_recompute=force_recompute
+    )
 
 
 if __name__ == "__main__":
     import argparse
     from src.baseline.data_splitter import load_dataset, split_dataset
 
-    parser = argparse.ArgumentParser(description="Extract DeBERTa embeddings (supports base or LoRA models)")
-    parser.add_argument("--adapter-dir", type=str, default=None, help="Path to trained LoRA adapter directory")
+    parser = argparse.ArgumentParser(description="Extract DeBERTa embeddings")
     parser.add_argument("--model-name", type=str, default="microsoft/deberta-v3-small")
     parser.add_argument("--dataset-path", type=str, default="bughubs_canonical.parquet")
     parser.add_argument("--sample-size", type=int, default=50000)
-    parser.add_argument("--out-dir", type=str, default="data/embeddings/finetuned")
+    parser.add_argument("--out-dir", type=str, default="data/embeddings")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--max-length", type=int, default=256)
     parser.add_argument("--force-recompute", action="store_true")
@@ -175,7 +345,6 @@ if __name__ == "__main__":
 
     extractor = DebertaEmbeddingExtractor(
         model_name=args.model_name,
-        adapter_path=args.adapter_dir,
         max_length=args.max_length,
         batch_size=args.batch_size,
         use_fp16=True,

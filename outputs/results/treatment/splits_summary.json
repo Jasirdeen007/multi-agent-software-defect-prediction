@@ -1,9 +1,0 @@
-{
-  "train_size": 3500,
-  "val_size": 750,
-  "test_size": 750,
-  "train_bug_ratio": 0.7006,
-  "val_bug_ratio": 0.7,
-  "test_bug_ratio": 0.7,
-  "random_seed": 42
-}

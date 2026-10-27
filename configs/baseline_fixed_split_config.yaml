@@ -1,0 +1,48 @@
+# Fresh baseline run using the persisted common train/validation/test split.
+model:
+  name: "microsoft/deberta-v3-small"
+  max_length: 256
+  batch_size: 32
+  use_fp16: true
+  pooling: "cls"
+  device: "cuda"
+
+data:
+  dataset_path: "data/processed/bughubs_canonical.parquet"
+  text_column: "model_text"
+  label_column: "original_label"
+  label_map:
+    bug: 1
+    non-bug: 0
+  sample_size: null
+  test_size: 0.15
+  val_size: 0.15
+  random_seed: 42
+  split_dir: "data/processed/fixed_splits"
+
+xgboost:
+  n_estimators: 500
+  max_depth: 4
+  learning_rate: 0.05
+  subsample: 0.7
+  colsample_bytree: 0.6
+  reg_alpha: 2.0
+  reg_lambda: 10.0
+  gamma: 1.0
+  min_child_weight: 3.0
+  scale_pos_weight: 1.0
+  eval_metric: "logloss"
+  early_stopping_rounds: 35
+  random_state: 42
+  tree_method: "hist"
+  max_bin: 64
+  device: "cuda"
+
+shap:
+  sample_size: 500
+
+output:
+  embeddings_dir: "data/embeddings"
+  model_dir: "outputs/models/baseline/fixed_split"
+  results_dir: "outputs/results/baseline/fixed_split"
+  figures_dir: "outputs/figures/baseline/fixed_split"

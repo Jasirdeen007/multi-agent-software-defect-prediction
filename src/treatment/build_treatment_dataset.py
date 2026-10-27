@@ -26,7 +26,7 @@ def _label_counts(values: Counter[str]) -> dict[str, int]:
 def build_treatment_dataset(
     train_path: str | Path = "data/processed/fixed_splits/train.parquet",
     audit_sample_path: str | Path = "data/processed/audit_train_sample_1000_from_5000.parquet",
-    audited_json_path: str | Path = "outputs/results/audited_train_1000_onecall/audited_records.json",
+    audited_json_path: str | Path = "outputs/results/audited_train_1000_independent_calls/audited_records.json",
     output_path: str | Path = "data/processed/fixed_splits/treatment_train.parquet",
     summary_path: str | Path = "outputs/results/treatment/treatment_dataset_summary_current.json",
     overwrite: bool = False,
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build the treatment training set from the frozen train split and agent audit labels.")
     parser.add_argument("--train", default="data/processed/fixed_splits/train.parquet")
     parser.add_argument("--audit-sample", default="data/processed/audit_train_sample_1000_from_5000.parquet")
-    parser.add_argument("--audited-json", default="outputs/results/audited_train_1000_onecall/audited_records.json")
+    parser.add_argument("--audited-json", default="outputs/results/audited_train_1000_independent_calls/audited_records.json")
     parser.add_argument("--output", default="data/processed/fixed_splits/treatment_train.parquet")
     parser.add_argument("--summary", default="outputs/results/treatment/treatment_dataset_summary_current.json")
     parser.add_argument("--overwrite", action="store_true")

@@ -6,8 +6,8 @@ from pathlib import Path
 import yaml
 from sklearn.metrics import accuracy_score
 
-from src.baseline.data_splitter import load_or_create_fixed_splits
-from src.baseline.embedding_extractor import DebertaEmbeddingExtractor, get_or_extract_embeddings
+from src.baseline.data_splitter import load_frozen_split_metadata, load_or_create_fixed_splits
+from src.baseline.embedding_extractor import DebertaEmbeddingExtractor, get_or_extract_parquet_embeddings
 from src.baseline.evaluator import (
     evaluate_predictions,
     plot_and_save_figures,
@@ -25,14 +25,23 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
     # 1. Load the persisted common split. Both experiments use these same rows.
     data_cfg = cfg["data"]
     out_cfg = cfg["output"]
-    train_df, val_df, test_df = load_or_create_fixed_splits(
-        dataset_path=data_cfg["dataset_path"],
-        split_dir=data_cfg.get("split_dir", "data/processed/fixed_splits"),
-        sample_size=data_cfg.get("sample_size"),
+    split_dir = Path(data_cfg.get("split_dir", "data/processed/fixed_splits"))
+    if not all((split_dir / f"{name}.parquet").is_file() for name in ("train", "validation", "test")):
+        load_or_create_fixed_splits(
+            dataset_path=data_cfg["dataset_path"],
+            split_dir=split_dir,
+            sample_size=data_cfg.get("sample_size"),
+            label_column=data_cfg["label_column"],
+            test_size=data_cfg.get("test_size", 0.15),
+            val_size=data_cfg.get("val_size", 0.15),
+            random_seed=data_cfg.get("random_seed", 42),
+        )
+    train_df, val_df, test_df = load_frozen_split_metadata(
+        split_dir=split_dir,
         label_column=data_cfg["label_column"],
+        random_seed=data_cfg.get("random_seed", 42),
         test_size=data_cfg.get("test_size", 0.15),
         val_size=data_cfg.get("val_size", 0.15),
-        random_seed=data_cfg.get("random_seed", 42),
     )
     label_map = data_cfg.get("label_map", {"bug": 1, "non-bug": 0})
     for part in (train_df, val_df, test_df):
@@ -51,27 +60,30 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
         device=model_cfg.get("device", "auto"),
     )
 
-    X_train = get_or_extract_embeddings(
+    X_train = get_or_extract_parquet_embeddings(
         extractor=extractor,
-        texts=train_df[data_cfg["text_column"]].tolist(),
+        parquet_path=split_dir / "train.parquet",
+        text_column=data_cfg["text_column"],
         cache_path=emb_dir / f"train_embeddings_{len(train_df)}.npy",
         split_name="train",
         force_recompute=force_recompute,
     )
     y_train = train_df["target"].to_numpy()
 
-    X_val = get_or_extract_embeddings(
+    X_val = get_or_extract_parquet_embeddings(
         extractor=extractor,
-        texts=val_df[data_cfg["text_column"]].tolist(),
+        parquet_path=split_dir / "validation.parquet",
+        text_column=data_cfg["text_column"],
         cache_path=emb_dir / f"val_embeddings_{len(val_df)}.npy",
         split_name="val",
         force_recompute=force_recompute,
     )
     y_val = val_df["target"].to_numpy()
 
-    X_test = get_or_extract_embeddings(
+    X_test = get_or_extract_parquet_embeddings(
         extractor=extractor,
-        texts=test_df[data_cfg["text_column"]].tolist(),
+        parquet_path=split_dir / "test.parquet",
+        text_column=data_cfg["text_column"],
         cache_path=emb_dir / f"test_embeddings_{len(test_df)}.npy",
         split_name="test",
         force_recompute=force_recompute,
@@ -94,6 +106,7 @@ def run_pipeline(config_path: str = "configs/baseline_config.yaml", force_recomp
         eval_metric=xgb_cfg.get("eval_metric", "logloss"),
         early_stopping_rounds=xgb_cfg.get("early_stopping_rounds", 35),
         tree_method=xgb_cfg.get("tree_method", "hist"),
+        max_bin=xgb_cfg.get("max_bin", 256),
         device=xgb_cfg.get("device", "cuda"),
         random_state=xgb_cfg.get("random_state", 42),
     )

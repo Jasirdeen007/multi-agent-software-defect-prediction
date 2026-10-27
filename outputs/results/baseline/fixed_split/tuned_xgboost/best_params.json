@@ -1,0 +1,19 @@
+{
+  "objective": "validation_roc_auc",
+  "best_validation_roc_auc": 0.858166486512897,
+  "params": {
+    "n_estimators": 700,
+    "max_bin": 64,
+    "max_depth": 6,
+    "learning_rate": 0.07143492495654545,
+    "subsample": 0.6747034240297204,
+    "colsample_bytree": 0.5820600280376598,
+    "reg_alpha": 1.8811183648208265,
+    "reg_lambda": 2.541101012466166,
+    "gamma": 0.7999444529398343,
+    "min_child_weight": 6.01582093638773
+  },
+  "trials_completed": 15,
+  "seed": 42,
+  "device": "cuda"
+}

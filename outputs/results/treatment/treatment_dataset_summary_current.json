@@ -4,21 +4,21 @@
   "audit_sample_path": "data\\processed\\audit_train_sample_1000_from_5000.parquet",
   "audit_records_path": "outputs\\results\\audited_train_1000_onecall\\audited_records.json",
   "training_records": 648424,
-  "audited_records": 200,
-  "unaudited_records": 648224,
-  "audit_coverage_of_training": 0.00030844015644084736,
-  "label_changes": 38,
-  "label_change_rate_among_audited": 0.19,
+  "audited_records": 1000,
+  "unaudited_records": 647424,
+  "audit_coverage_of_training": 0.0015422007822042368,
+  "label_changes": 170,
+  "label_change_rate_among_audited": 0.17,
   "original_label_distribution": {
     "bug": 454130,
     "non-bug": 194294
   },
   "treatment_label_distribution": {
-    "bug": 454106,
-    "non-bug": 194318
+    "bug": 454112,
+    "non-bug": 194312
   },
   "audit_methods": {
-    "single_model_four_perspective_one_call": 200
+    "single_model_four_perspective_one_call": 1000
   },
   "label_policy": "judge_label for audited training issues; original_label for all others",
   "original_label_column_preserved": true,

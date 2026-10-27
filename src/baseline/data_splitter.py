@@ -61,6 +61,7 @@ def load_or_create_fixed_splits(
     test_size: float = 0.15,
     val_size: float = 0.15,
     random_seed: int = 42,
+    split_assignments_path: str | Path | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Create once and then reuse immutable train/validation/test Parquet splits."""
     split_path = Path(split_dir)
@@ -80,13 +81,22 @@ def load_or_create_fixed_splits(
                     raise ValueError(f"Frozen {name} split identities changed after manifest creation.")
         else:
             _write_split_manifest(split_path, splits, random_seed, test_size, val_size)
+        if split_assignments_path is not None:
+            source_df = load_dataset(dataset_path, sample_size=sample_size, random_seed=random_seed)
+            assigned_splits = apply_split_assignments(source_df, split_assignments_path)
+            for name, current, expected in zip(("train", "validation", "test"), splits, assigned_splits):
+                if _identity_digest(current) != _identity_digest(expected):
+                    raise ValueError(f"Cached {name} identities do not match the supplied frozen split assignments.")
         return tuple(splits)  # type: ignore[return-value]
 
     df = load_dataset(dataset_path, sample_size=sample_size, random_seed=random_seed)
-    train, val, test = split_dataset(
-        df, label_column=label_column, test_size=test_size, val_size=val_size,
-        random_seed=random_seed,
-    )
+    if split_assignments_path is not None:
+        train, val, test = apply_split_assignments(df, split_assignments_path)
+    else:
+        train, val, test = split_dataset(
+            df, label_column=label_column, test_size=test_size, val_size=val_size,
+            random_seed=random_seed,
+        )
     # Remove derived numeric target: each experiment derives its target from its own label column.
     for part in (train, val, test):
         part.drop(columns=["target"], errors="ignore", inplace=True)
@@ -96,6 +106,73 @@ def load_or_create_fixed_splits(
     _write_split_manifest(split_path, (train, val, test), random_seed, test_size, val_size)
     validate_split_disjointness(train, val, test)
     return train, val, test
+
+
+def load_frozen_split_metadata(
+    split_dir: str | Path,
+    label_column: str = "original_label",
+    random_seed: int = 42,
+    test_size: float = 0.15,
+    val_size: float = 0.15,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Load only identities and labels from verified frozen splits for model runs."""
+    split_path = Path(split_dir)
+    names = ("train", "validation", "test")
+    manifest_path = split_path / "split_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(f"Frozen split manifest not found: {manifest_path}")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("random_seed") != random_seed:
+        raise ValueError("Configured seed differs from the frozen split manifest.")
+    if manifest.get("test_size") != test_size or manifest.get("val_size") != val_size:
+        raise ValueError("Configured split ratios differ from the frozen split manifest.")
+
+    columns = ["source", "project", "issue_id", label_column]
+    frames = []
+    for name in names:
+        path = split_path / f"{name}.parquet"
+        if not path.is_file():
+            raise FileNotFoundError(f"Frozen split file not found: {path}")
+        frame = pd.read_parquet(path, columns=columns)
+        if frame[label_column].isna().any():
+            raise ValueError(f"Frozen {name} split contains missing labels.")
+        if len(frame) != manifest.get({"train": "train_size", "validation": "validation_size_records", "test": "test_records"}[name]):
+            raise ValueError(f"Frozen {name} split row count differs from its manifest.")
+        if _identity_digest(frame) != manifest["identity_sha256"][name]:
+            raise ValueError(f"Frozen {name} split identities differ from its manifest.")
+        frames.append(frame)
+    validate_split_disjointness(*frames)
+    return tuple(frames)  # type: ignore[return-value]
+
+
+def apply_split_assignments(
+    df: pd.DataFrame,
+    assignments_path: str | Path,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Apply a frozen identity-to-split mapping independent of source row order."""
+    keys = ["source", "project", "issue_id"]
+    assignments = pd.read_parquet(assignments_path, columns=keys + ["split", "split_order"])
+    source = df.copy()
+    source[keys] = source[keys].astype(str)
+    assignments[keys] = assignments[keys].astype(str)
+    if assignments.duplicated(keys).any() or source.duplicated(keys).any():
+        raise ValueError("Canonical data and split assignments must have unique composite identities.")
+    if len(source) != len(assignments):
+        raise ValueError(f"Split assignment row count {len(assignments)} differs from eligible data count {len(source)}.")
+    merged = assignments.merge(source, on=keys, how="left", validate="one_to_one", indicator=True)
+    if not merged["_merge"].eq("both").all():
+        absent = int((merged["_merge"] != "both").sum())
+        raise ValueError(f"{absent} split identities are absent from the eligible canonical dataset.")
+    unexpected = set(merged["split"].astype(str)) - {"train", "validation", "test"}
+    if unexpected:
+        raise ValueError(f"Invalid split names in assignment file: {sorted(unexpected)}")
+
+    parts = []
+    for name in ("train", "validation", "test"):
+        part = merged.loc[merged["split"].eq(name)].sort_values("split_order")
+        part = part.drop(columns=["split", "split_order", "_merge"]).reset_index(drop=True)
+        parts.append(part)
+    return tuple(parts)  # type: ignore[return-value]
 
 
 def _write_split_manifest(split_path: Path, splits: tuple[pd.DataFrame, ...] | list[pd.DataFrame], seed: int, test_size: float, val_size: float) -> None:

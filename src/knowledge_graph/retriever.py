@@ -1,118 +1,83 @@
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import Any
-import networkx as nx
+
 import pandas as pd
 
 
 class KnowledgeGraphRetriever:
-    """Retrieves structured relational evidence from the Knowledge Graph for agent reasoning."""
+    """Training-only relational statistics, with each target issue excluded from its own priors."""
 
-    def __init__(self, dataset_path: str = "data/processed/audit_sample.parquet"):
+    def __init__(self, dataset_path: str = "data/processed/fixed_splits/train.parquet"):
         self.dataset_path = Path(dataset_path)
-        self.df = None
-        self._load_data()
+        if not self.dataset_path.exists():
+            raise FileNotFoundError(f"Training-only KG source not found: {self.dataset_path}")
+        cols = ["source", "project", "issue_id", "component", "severity", "original_label"]
+        self.df = pd.read_parquet(self.dataset_path, columns=cols)
+        self.df["issue_id"] = self.df["issue_id"].astype(str)
+        self.df["_project_key"] = self.df["project"].fillna("").astype(str).str.casefold()
+        self.df["_component_key"] = self.df["component"].fillna("").astype(str).str.casefold()
+        self.df["_source_key"] = self.df["source"].fillna("").astype(str).str.casefold()
+        self.df["_is_bug"] = self.df["original_label"].fillna("").astype(str).str.casefold().eq("bug")
+        self.project_stats = self.df.groupby("_project_key")["_is_bug"].agg(["sum", "count"])
+        self.component_stats = self.df.groupby(["_project_key", "_component_key"])["_is_bug"].agg(["sum", "count"])
+        self.severity_stats = self.df.groupby(["_source_key", self.df["severity"].fillna("").astype(str).str.casefold()])["_is_bug"].agg(["sum", "count"])
 
-    def _load_data(self):
-        if self.dataset_path.exists():
-            cols = ["source", "project", "issue_id", "component", "severity", "priority", "original_label"]
-            self.df = pd.read_parquet(self.dataset_path, columns=cols)
-            self.df["issue_id"] = self.df["issue_id"].astype(str)
+    @staticmethod
+    def _loo(stats: pd.DataFrame, key: Any, current_is_bug: bool) -> tuple[int, int]:
+        if key not in stats.index:
+            return 0, 0
+        row = stats.loc[key]
+        return int(row["sum"]) - int(current_is_bug), int(row["count"]) - 1
+
+    @staticmethod
+    def _format_prior(label: str, bug_count: int, total: int) -> str | None:
+        if total <= 0:
+            return None
+        return f"[Train-only KG {label}] {100 * bug_count / total:.1f}% original-label BUG rate ({bug_count}/{total} training issues; target issue excluded)."
 
     def retrieve_evidence_for_issue(self, issue: dict[str, Any]) -> list[str]:
-        """Returns structured relational evidence strings for an issue from the Knowledge Graph."""
-        if self.df is None:
-            return ["Knowledge Graph index not available."]
+        project = str(issue.get("project") or "").casefold()
+        component = str(issue.get("component") or "").casefold()
+        source = str(issue.get("source") or "").casefold()
+        issue_id = str(issue.get("issue_id") or "")
+        rows = self.df[
+            self.df["_project_key"].eq(project)
+            & self.df["_source_key"].eq(source)
+            & self.df["issue_id"].eq(issue_id)
+        ]
+        current_is_bug = bool(rows.iloc[0]["_is_bug"]) if len(rows) else False
+        evidence: list[str] = []
 
-        evidence = []
-        source = str(issue.get("source", "")).strip()
-        project = str(issue.get("project", "")).strip()
-        issue_id = str(issue.get("issue_id", "")).strip()
-        comp = issue.get("component")
-        sev = issue.get("severity")
-        pri = issue.get("priority")
+        bugs, total = self._loo(self.project_stats, project, current_is_bug if len(rows) else False)
+        line = self._format_prior("project context", bugs, total)
+        if line:
+            evidence.append(line)
 
-        # 1. Project-level defect prior
-        proj_matches = self.df[self.df["project"].str.lower() == project.lower()]
-        if len(proj_matches) > 0:
-            bug_count = (proj_matches["original_label"].str.lower() == "bug").sum()
-            rate = bug_count / len(proj_matches) * 100.0
-            evidence.append(
-                f"[KG Project Context] Project '{project}' has a historical defect rate of {rate:.1f}% "
-                f"({bug_count}/{len(proj_matches)} sample issues classified as bugs)."
-            )
+        if component:
+            bugs, total = self._loo(self.component_stats, (project, component), current_is_bug if len(rows) else False)
+            line = self._format_prior("project-component context", bugs, total)
+            if line:
+                evidence.append(line)
 
-        # 1b. Macro Knowledge Graph global prior (across 926k issues)
-        try:
-            from src.knowledge_graph.load_macro_kg import get_macro_kg
-            macro_kg = get_macro_kg()
-            m_proj = macro_kg.get_project_prior(project)
-            if m_proj:
-                m_rate = float(m_proj.get("bug_rate", 0)) * 100.0
-                m_total = m_proj.get("count", 0)
-                m_bugs = m_proj.get("bug_count", 0)
-                evidence.append(
-                    f"[KG Global Prior] Population-wide Knowledge Graph: Project '{project}' exhibits "
-                    f"{m_rate:.1f}% defect density ({m_bugs:,}/{m_total:,} total issues tracked)."
-                )
-        except Exception:
-            pass
+        severity = str(issue.get("severity") or "").casefold()
+        if severity:
+            # Resolve the current training-group count and leave the target record out.
+            key = (source, severity)
+            stat_bugs, stat_count = self.severity_stats.loc[key].tolist() if key in self.severity_stats.index else (0, 0)
+            if len(rows):
+                stat_bugs, stat_count = int(stat_bugs) - int(current_is_bug), int(stat_count) - 1
+            line = self._format_prior("source-severity context", int(stat_bugs), int(stat_count))
+            if line:
+                evidence.append(line)
 
-        # 2. Component-level defect prior & clusters
-        if comp and pd.notna(comp) and str(comp).strip():
-            comp_name = str(comp).strip()
-            comp_matches = self.df[
-                (self.df["project"].str.lower() == project.lower()) &
-                (self.df["component"].astype(str).str.lower() == comp_name.lower())
-            ]
-            if len(comp_matches) > 0:
-                c_bugs = (comp_matches["original_label"].str.lower() == "bug").sum()
-                c_rate = c_bugs / len(comp_matches) * 100.0
-                evidence.append(
-                    f"[KG Component Cluster] Component '{comp_name}' exhibits {c_rate:.1f}% defect density "
-                    f"({c_bugs}/{len(comp_matches)} issues are confirmed defects)."
-                )
-
-            # Query Macro KG defect clusters
-            try:
-                from src.knowledge_graph.load_macro_kg import get_macro_kg
-                macro_kg = get_macro_kg()
-                clusters = macro_kg.get_defect_clusters(comp_name)
-                if clusters:
-                    top_cluster = clusters[0]
-                    evidence.append(
-                        f"[KG Defect Cluster] Component '{comp_name}' clusters with '{top_cluster.get('component')}' "
-                        f"(Cluster avg defect density: {float(top_cluster.get('avg_bug_rate', 0))*100:.1f}%)."
-                    )
-            except Exception:
-                pass
-
-        # 3. Source-level Severity / Priority co-occurrence
-        if sev and pd.notna(sev) and str(sev).strip():
-            sev_name = str(sev).strip().lower()
-            sev_matches = self.df[
-                (self.df["source"].str.lower() == source.lower()) &
-                (self.df["severity"].astype(str).str.lower() == sev_name)
-            ]
-            if len(sev_matches) > 0:
-                s_bugs = (sev_matches["original_label"].str.lower() == "bug").sum()
-                s_rate = s_bugs / len(sev_matches) * 100.0
-                evidence.append(
-                    f"[KG Metadata Rule] Severity '{sev_name}' in {source} correlates with defects in {s_rate:.1f}% of cases."
-                )
-
-        # 4. Topology provenance
-        evidence.append(
-            f"[KG Topology Node] Composite Entity URI: '{source.upper()}::{project}::{issue_id}'."
-        )
-
+        evidence.append(f"[KG identity] {source}::{project}::{issue_id}; evidence source: frozen training split only.")
         return evidence
 
 
-# Singleton instance for fast retrieval
-_kg_retriever_instance = None
+_kg_retriever_instance: KnowledgeGraphRetriever | None = None
+
 
 def get_kg_retriever() -> KnowledgeGraphRetriever:
     global _kg_retriever_instance

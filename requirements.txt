@@ -8,10 +8,13 @@ openpyxl>=3.1,<4
 pyarrow
 scikit-learn>=1.5,<2
 jupyter>=1.0,<2
-torch>=2.1
-transformers>=4.36
+# This project trains on an NVIDIA GPU. Install the matching official CUDA wheel.
+--extra-index-url https://download.pytorch.org/whl/cu130
+torch==2.14.1+cu130
+transformers>=4.36,<5
 sentencepiece>=0.2
-xgboost>=2.0
+xgboost>=2.0,<4
+optuna>=4,<5
 shap>=0.43
 onnx>=1.16
 onnxmltools>=1.12

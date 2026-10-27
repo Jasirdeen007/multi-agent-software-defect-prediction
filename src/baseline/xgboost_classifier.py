@@ -28,6 +28,7 @@ class XGBoostBaselineClassifier:
         eval_metric: str = "logloss",
         early_stopping_rounds: int = 35,
         tree_method: str = "hist",
+        max_bin: int = 256,
         device: str = "cuda",
         random_state: int = 42,
     ):
@@ -44,6 +45,7 @@ class XGBoostBaselineClassifier:
         self.eval_metric = eval_metric
         self.early_stopping_rounds = early_stopping_rounds
         self.tree_method = tree_method
+        self.max_bin = max_bin
         self.device = device
         self.random_state = random_state
         self.model: xgb.XGBClassifier | None = None
@@ -79,6 +81,7 @@ class XGBoostBaselineClassifier:
             eval_metric=self.eval_metric,
             early_stopping_rounds=self.early_stopping_rounds,
             tree_method=self.tree_method,
+            max_bin=self.max_bin,
             device=self.device,
             random_state=self.random_state,
         )
@@ -89,7 +92,7 @@ class XGBoostBaselineClassifier:
         self.model.fit(
             X_train,
             y_train,
-            eval_set=[(X_train, y_train), (X_val, y_val)],
+            eval_set=[(X_val, y_val)],
             verbose=50,
         )
         print(f"Training completed. Best iteration: {self.model.best_iteration}")

@@ -1,16 +1,27 @@
 {
-  "total_records": 5000,
-  "audited_records": 20,
-  "unaudited_records": 4980,
-  "flipped_labels": 0,
-  "audit_flip_rate": 0.0,
-  "original_distribution": {
-    "bug": 0.7004,
-    "non-bug": 0.2996
+  "dataset_path": "data\\processed\\fixed_splits\\treatment_train.parquet",
+  "baseline_train_path": "data\\processed\\fixed_splits\\train.parquet",
+  "audit_sample_path": "data\\processed\\audit_train_sample_1000_from_5000.parquet",
+  "audit_records_path": "outputs\\results\\audited_train_1000_onecall\\audited_records.json",
+  "training_records": 648424,
+  "audited_records": 1000,
+  "unaudited_records": 647424,
+  "audit_coverage_of_training": 0.0015422007822042368,
+  "label_changes": 170,
+  "label_change_rate_among_audited": 0.17,
+  "original_label_distribution": {
+    "bug": 454130,
+    "non-bug": 194294
   },
-  "treatment_distribution": {
-    "bug": 0.7004,
-    "non-bug": 0.2996
+  "treatment_label_distribution": {
+    "bug": 454112,
+    "non-bug": 194312
   },
-  "timestamp": "2026-10-16T21:54:59.725864"
+  "audit_methods": {
+    "single_model_four_perspective_one_call": 1000
+  },
+  "label_policy": "judge_label for audited training issues; original_label for all others",
+  "original_label_column_preserved": true,
+  "validation_and_test_modified": false,
+  "caution": "Audited labels are model-generated decisions, not independently verified ground truth."
 }

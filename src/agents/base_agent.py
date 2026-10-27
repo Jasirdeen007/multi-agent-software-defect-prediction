@@ -31,6 +31,7 @@ class BaseAuditAgent:
         min_request_interval_seconds: float = 15.0,
         max_completion_tokens: int = 256,
         provider: str = "groq",
+        api_key_env: str | None = None,
     ):
         self.name = name
         self.model = model
@@ -41,19 +42,35 @@ class BaseAuditAgent:
         self.min_request_interval_seconds = min_request_interval_seconds
         self.max_completion_tokens = max_completion_tokens
         self.provider = provider.lower().strip()
+        self.api_key_env = api_key_env or (
+            "GROQ_API_KEY" if self.provider == "groq"
+            else "OPENROUTER_API_KEY" if self.provider == "openrouter"
+            else "GEMINI_API_KEY"
+        )
 
         if self.provider == "groq":
-            api_key = os.getenv("GROQ_API_KEY")
+            api_key = os.getenv(self.api_key_env)
             if not api_key:
-                raise ValueError("GROQ_API_KEY not found in environment. Set it in .env.")
+                raise ValueError(f"{self.api_key_env} not found in environment. Set it in .env.")
             # Disable SDK-level retries; the bounded, visible retry loop below owns them.
             self.client = AsyncGroq(api_key=api_key, timeout=request_timeout_seconds, max_retries=0)
+        elif self.provider == "openrouter":
+            from openai import AsyncOpenAI
+            api_key = os.getenv(self.api_key_env)
+            if not api_key:
+                raise ValueError(f"{self.api_key_env} not found in environment. Set it in .env.")
+            self.client = AsyncOpenAI(
+                api_key=api_key,
+                base_url="https://openrouter.ai/api/v1",
+                timeout=request_timeout_seconds,
+                max_retries=0,
+            )
         elif self.provider == "gemini":
-            if not os.getenv("GEMINI_API_KEY"):
-                raise ValueError("GEMINI_API_KEY not found in environment. Set it in .env to use Gemini.")
+            if not os.getenv(self.api_key_env):
+                raise ValueError(f"{self.api_key_env} not found in environment. Set it in .env to use Gemini.")
             self.client = None
         else:
-            raise ValueError(f"Unsupported LLM provider: {provider!r}; expected 'groq' or 'gemini'.")
+            raise ValueError(f"Unsupported LLM provider: {provider!r}; expected 'groq', 'openrouter', or 'gemini'.")
         self.prompt_tokens = 0
         self.completion_tokens = 0
         self.usage_by_model: dict[str, dict[str, int]] = {}
@@ -69,21 +86,36 @@ class BaseAuditAgent:
         current_model = self.model
         while attempt < self.max_retries:
             try:
-                lock = _MODEL_LOCKS.setdefault(current_model, asyncio.Lock())
+                slot_key = f"{self.provider}:{self.api_key_env}:{current_model}"
+                lock = _MODEL_LOCKS.setdefault(slot_key, asyncio.Lock())
                 async with lock:
-                    elapsed = time.monotonic() - _MODEL_LAST_REQUEST_AT.get(current_model, 0.0)
+                    elapsed = time.monotonic() - _MODEL_LAST_REQUEST_AT.get(slot_key, 0.0)
                     wait_for_slot = self.min_request_interval_seconds - elapsed
                     if wait_for_slot > 0:
                         await asyncio.sleep(wait_for_slot)
-                    if self.provider == "groq":
+                    if self.provider in ("groq", "openrouter"):
+                        extra_headers = {}
+                        if self.provider == "openrouter":
+                            extra_headers = {
+                                "HTTP-Referer": "https://github.com/Jasirdeen007/multi-agent-software-defect-prediction",
+                                "X-Title": "Multi-Agent SDP",
+                            }
                         response = await self.client.chat.completions.create(
                             model=current_model,
                             messages=messages,
                             temperature=self.temperature,
                             response_format={"type": "json_object"},
                             max_tokens=self.max_completion_tokens,
+                            extra_headers=extra_headers if extra_headers else None,
                         )
-                        raw_text = response.choices[0].message.content.strip()
+                        msg = response.choices[0].message
+                        raw_text = (getattr(msg, "content", "") or "").strip()
+                        if not raw_text and getattr(msg, "reasoning", None):
+                            m_json = re.search(r"(\{.*\})", msg.reasoning or "", re.DOTALL)
+                            if m_json:
+                                raw_text = m_json.group(1).strip()
+                        if not raw_text:
+                            raise ValueError(f"Provider {self.provider} model {current_model} returned empty content.")
                         usage = getattr(response, "usage", None)
                         prompt_tokens = int(getattr(usage, "prompt_tokens", 0) or 0)
                         completion_tokens = int(getattr(usage, "completion_tokens", 0) or 0)
@@ -91,7 +123,7 @@ class BaseAuditAgent:
                         response, raw_text, prompt_tokens, completion_tokens = await asyncio.to_thread(
                             self._gemini_generate, current_model, system_prompt, user_prompt
                         )
-                    _MODEL_LAST_REQUEST_AT[current_model] = time.monotonic()
+                    _MODEL_LAST_REQUEST_AT[slot_key] = time.monotonic()
                 if prompt_tokens or completion_tokens:
                     self.prompt_tokens += prompt_tokens
                     self.completion_tokens += completion_tokens
@@ -132,9 +164,9 @@ class BaseAuditAgent:
         self, model: str, system_prompt: str, user_prompt: str
     ) -> tuple[dict[str, Any], str, int, int]:
         """Calls Gemini's generateContent REST API using the standard library."""
-        api_key = os.getenv("GEMINI_API_KEY")
+        api_key = os.getenv(self.api_key_env)
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment.")
+            raise ValueError(f"{self.api_key_env} not found in environment.")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         payload = {
             "systemInstruction": {"parts": [{"text": system_prompt}]},

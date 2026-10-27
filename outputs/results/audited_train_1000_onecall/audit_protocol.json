@@ -1,8 +1,0 @@
-{
-  "method": "single_model_four_perspective_one_call",
-  "calls_per_issue": 1,
-  "perspectives_are_independent_agents": false,
-  "judge_confidence_definition": "mean confidence of council perspectives supporting Judge label multiplied by majority agreement; not calibrated",
-  "sample_size": 1000,
-  "candidate_dataset": "data/processed/audit_train_sample_1000_from_5000.parquet"
-}

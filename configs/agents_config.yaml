@@ -3,13 +3,29 @@ llm:
   provider: "groq"
   subagent_model: "qwen/qwen3.8-27b"
   judge_model: "openai/gpt-oss-120b"
-  fallback_model: "openai/gpt-oss-20b"
   temperature: 0.1
   max_tokens: 512
-  max_retries: 3
+  max_retries: 2
   request_timeout_seconds: 60
-  min_request_interval_seconds: 18
-  rate_limit_delay_seconds: 2.0
+  min_request_interval_seconds: 4
+  rate_limit_delay_seconds: 0.25
+  agents:
+    semantic:
+      provider: "gemini"
+      model: "gemini-3.5-flash-lite"
+      api_key_env: "SEMANTIC_AUDITOR_API_KEY"
+    skeptic:
+      provider: "groq"
+      model: "qwen/qwen3.8-27b"
+      api_key_env: "SKEPTIC_AUDITOR_API_KEY"
+    structural:
+      provider: "groq"
+      model: "qwen/qwen3.8-27b"
+      api_key_env: "STRUCTURAL_AUDITOR_API_KEY"
+    judge:
+      provider: "gemini"
+      model: "gemini-3.5-flash-lite"
+      api_key_env: "JUDGE_AUDITOR_API_KEY"
   # Optional actual vendor rates. Set every model used to enable USD estimates.
   # pricing_usd_per_million_tokens:
   #   "provider/model-id": {input: 0.0, output: 0.0}
@@ -20,11 +36,11 @@ audit:
   batch_size: 5
   random_seed: 42
   checkpoint_frequency: 25
-  output_dir: "outputs/results/audited_train_1000_onecall"
-  output_parquet: "data/processed/audited_train_1000_onecall_labels.parquet"
+  output_dir: "outputs/results/audited_train_1000_independent_calls"
+  output_parquet: "data/processed/audited_train_1000_independent_calls_labels.parquet"
 
 roles:
-  audit_protocol: "single model call produces all three perspectives and Judge decision; perspectives are not independent agents"
+  audit_protocol: "three separate specialist API calls followed by a separate Judge API call; all four outputs are preserved"
   policy_agent:
     name: "Policy Compliance Agent"
     focus: "Evaluate issue description against ISO/IEEE defect definitions (malfunction vs feature request)"
