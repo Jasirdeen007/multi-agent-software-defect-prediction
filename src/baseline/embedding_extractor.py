@@ -29,7 +29,6 @@ class DebertaEmbeddingExtractor:
     def __init__(
         self,
         model_name: str = "microsoft/deberta-v3-small",
-        adapter_path: str | Path | None = None,
         max_length: int = 256,
         batch_size: int = 32,
         use_fp16: bool = True,
@@ -37,7 +36,6 @@ class DebertaEmbeddingExtractor:
         device: str = "auto",
     ):
         self.model_name = model_name
-        self.adapter_path = adapter_path
         self.max_length = max_length
         self.batch_size = batch_size
         self.use_fp16 = use_fp16
@@ -50,30 +48,9 @@ class DebertaEmbeddingExtractor:
             if self.device.type == "cuda" and not torch.cuda.is_available():
                 raise RuntimeError("CUDA was requested but is unavailable; refusing to fall back to CPU.")
 
-        # Check if model_name itself is an adapter directory or if adapter_path is provided
-        eff_adapter = None
-        if adapter_path and Path(adapter_path).exists():
-            eff_adapter = Path(adapter_path)
-        elif Path(model_name).is_dir() and (Path(model_name) / "adapter_config.json").exists():
-            eff_adapter = Path(model_name)
-
-        if eff_adapter is not None:
-            import json
-            from peft import PeftModel
-            from transformers import AutoModelForSequenceClassification
-
-            with open(eff_adapter / "adapter_config.json", "r", encoding="utf-8") as f:
-                cfg = json.load(f)
-            base_model_name = cfg.get("base_model_name_or_path", "microsoft/deberta-v3-small")
-            print(f"Loading base model '{base_model_name}' with LoRA adapter from '{eff_adapter}' on {self.device} (FP16={use_fp16})...")
-            self.tokenizer = AutoTokenizer.from_pretrained(eff_adapter)
-            base_model = AutoModelForSequenceClassification.from_pretrained(base_model_name, num_labels=2)
-            peft_model = PeftModel.from_pretrained(base_model, str(eff_adapter))
-            self.model = peft_model.base_model.model.deberta
-        else:
-            print(f"Loading DeBERTa model: {model_name} on {self.device} (FP16={use_fp16})...")
-            self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-            self.model = AutoModel.from_pretrained(model_name)
+        print(f"Loading DeBERTa model: {model_name} on {self.device} (FP16={use_fp16})...")
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
 
         if self.use_fp16 and self.device.type == "cuda":
             self.model = self.model.half()
@@ -349,12 +326,11 @@ if __name__ == "__main__":
     import argparse
     from src.baseline.data_splitter import load_dataset, split_dataset
 
-    parser = argparse.ArgumentParser(description="Extract DeBERTa embeddings (supports base or LoRA models)")
-    parser.add_argument("--adapter-dir", type=str, default=None, help="Path to trained LoRA adapter directory")
+    parser = argparse.ArgumentParser(description="Extract DeBERTa embeddings")
     parser.add_argument("--model-name", type=str, default="microsoft/deberta-v3-small")
     parser.add_argument("--dataset-path", type=str, default="bughubs_canonical.parquet")
     parser.add_argument("--sample-size", type=int, default=50000)
-    parser.add_argument("--out-dir", type=str, default="data/embeddings/finetuned")
+    parser.add_argument("--out-dir", type=str, default="data/embeddings")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--max-length", type=int, default=256)
     parser.add_argument("--force-recompute", action="store_true")
@@ -369,7 +345,6 @@ if __name__ == "__main__":
 
     extractor = DebertaEmbeddingExtractor(
         model_name=args.model_name,
-        adapter_path=args.adapter_dir,
         max_length=args.max_length,
         batch_size=args.batch_size,
         use_fp16=True,

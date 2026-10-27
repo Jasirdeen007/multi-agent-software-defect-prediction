@@ -7,10 +7,10 @@
 model:
   name: "microsoft/deberta-v3-small"
   max_length: 256
-  batch_size: 32
+  batch_size: 128
   use_fp16: true
   pooling: "cls"        # [CLS] token embedding
-  device: "auto"        # auto | cuda | cpu
+  device: "cuda"
 
 data:
   dataset_path: "data/processed/bughubs_canonical.parquet"

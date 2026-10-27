@@ -1,0 +1,139 @@
+{
+  "accuracy": {
+    "display_name": "Accuracy",
+    "baseline": 0.7852,
+    "treatment": 0.785,
+    "delta": -0.0002,
+    "pct_change": -0.03,
+    "improved": false,
+    "lower_is_better": false
+  },
+  "balanced_accuracy": {
+    "display_name": "Balanced Accuracy",
+    "baseline": 0.7044,
+    "treatment": 0.7183,
+    "delta": 0.0139,
+    "pct_change": 1.97,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "macro_f1": {
+    "display_name": "Macro F1",
+    "baseline": 0.7195,
+    "treatment": 0.7291,
+    "delta": 0.0096,
+    "pct_change": 1.33,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "roc_auc": {
+    "display_name": "ROC-AUC",
+    "baseline": 0.8301,
+    "treatment": 0.83,
+    "delta": -0.0001,
+    "pct_change": -0.01,
+    "improved": false,
+    "lower_is_better": false
+  },
+  "matthews_corrcoef": {
+    "display_name": "Matthews Corr (MCC)",
+    "baseline": 0.4547,
+    "treatment": 0.4644,
+    "delta": 0.0097,
+    "pct_change": 2.13,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "precision_bug": {
+    "display_name": "Precision (Bug)",
+    "baseline": 0.8099,
+    "treatment": 0.8219,
+    "delta": 0.012,
+    "pct_change": 1.48,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "recall_bug": {
+    "display_name": "Recall (Bug)",
+    "baseline": 0.9059,
+    "treatment": 0.8847,
+    "delta": -0.0212,
+    "pct_change": -2.34,
+    "improved": false,
+    "lower_is_better": false
+  },
+  "f1_bug": {
+    "display_name": "F1 (Bug)",
+    "baseline": 0.8552,
+    "treatment": 0.8521,
+    "delta": -0.0031,
+    "pct_change": -0.36,
+    "improved": false,
+    "lower_is_better": false
+  },
+  "precision_non_bug": {
+    "display_name": "Precision (Non-Bug)",
+    "baseline": 0.6957,
+    "treatment": 0.6719,
+    "delta": -0.0238,
+    "pct_change": -3.42,
+    "improved": false,
+    "lower_is_better": false
+  },
+  "recall_non_bug": {
+    "display_name": "Recall (Non-Bug)",
+    "baseline": 0.503,
+    "treatment": 0.552,
+    "delta": 0.049,
+    "pct_change": 9.74,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "f1_non_bug": {
+    "display_name": "F1 (Non-Bug)",
+    "baseline": 0.5839,
+    "treatment": 0.6061,
+    "delta": 0.0222,
+    "pct_change": 3.8,
+    "improved": true,
+    "lower_is_better": false
+  },
+  "brier_score": {
+    "display_name": "Brier Score",
+    "baseline": 0.1483,
+    "treatment": 0.1483,
+    "delta": 0.0,
+    "pct_change": 0.0,
+    "improved": false,
+    "lower_is_better": true
+  },
+  "experiment_context": {
+    "treatment_dataset": {
+      "dataset_path": "data\\processed\\fixed_splits\\treatment_train.parquet",
+      "baseline_train_path": "data\\processed\\fixed_splits\\train.parquet",
+      "audit_sample_path": "data\\processed\\audit_train_sample_1000_from_5000.parquet",
+      "audit_records_path": "outputs\\results\\audited_train_1000_onecall\\audited_records.json",
+      "training_records": 648424,
+      "audited_records": 1000,
+      "unaudited_records": 647424,
+      "audit_coverage_of_training": 0.0015422007822042368,
+      "label_changes": 170,
+      "label_change_rate_among_audited": 0.17,
+      "original_label_distribution": {
+        "bug": 454130,
+        "non-bug": 194294
+      },
+      "treatment_label_distribution": {
+        "bug": 454112,
+        "non-bug": 194312
+      },
+      "audit_methods": {
+        "single_model_four_perspective_one_call": 1000
+      },
+      "label_policy": "judge_label for audited training issues; original_label for all others",
+      "original_label_column_preserved": true,
+      "validation_and_test_modified": false,
+      "caution": "Audited labels are model-generated decisions, not independently verified ground truth."
+    }
+  }
+}

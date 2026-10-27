@@ -1,0 +1,20 @@
+{
+  "accuracy": 0.7852,
+  "balanced_accuracy": 0.7044,
+  "precision_bug": 0.8099,
+  "recall_bug": 0.9059,
+  "f1_bug": 0.8552,
+  "precision_non_bug": 0.6957,
+  "recall_non_bug": 0.503,
+  "f1_non_bug": 0.5839,
+  "macro_f1": 0.7195,
+  "weighted_f1": 0.7739,
+  "roc_auc": 0.8301,
+  "matthews_corrcoef": 0.4547,
+  "brier_score": 0.1483,
+  "train_accuracy": 0.7916,
+  "overfitting_gap": 0.0064,
+  "optimal_threshold": 0.52,
+  "test_identity_sha256": "cc5b147ddba1b01bf252c0ab2d3b0b596bb3674a80458d8f3976208a2f53b0a1",
+  "test_records": 138949
+}

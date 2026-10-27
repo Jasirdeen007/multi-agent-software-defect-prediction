@@ -44,22 +44,49 @@ def test_sampling_is_reproducible_and_project_stratified():
 
 
 def test_audit_must_be_inside_training_and_keeps_original_label(tmp_path):
+    import json
     train = tiny_dataset().iloc[:12].copy()
     train_path = tmp_path / "train.parquet"
     train.to_parquet(train_path)
-    audited = pd.DataFrame([{
+
+    sample = train.iloc[:1].copy()
+    sample_path = tmp_path / "audit_sample.parquet"
+    sample.to_parquet(sample_path)
+
+    record = {
         "source": train.iloc[0].source, "project": train.iloc[0].project,
-        "issue_id": train.iloc[0].issue_id, "judge_label": "non-bug",
-        "judge_confidence": .8, "agent_agreement": .67, "label_flipped": True,
-    }])
-    audit_path = tmp_path / "audit.parquet"
-    audited.to_parquet(audit_path)
-    output = build_treatment_dataset(str(train_path), str(audit_path), str(tmp_path / "treatment.parquet"), str(tmp_path / "summary.json"))
+        "issue_id": train.iloc[0].issue_id, "original_label": train.iloc[0].original_label,
+        "policy_label": "non-bug", "data_label": "non-bug", "pattern_label": "non-bug",
+        "judge_label": "non-bug", "judge_confidence": .8, "agent_agreement": 1.0, "label_flipped": True,
+    }
+    audit_json = tmp_path / "audited_records.json"
+    audit_json.write_text(json.dumps([record]))
+
+    treatment_path = tmp_path / "treatment.parquet"
+    summary_path = tmp_path / "summary.json"
+    build_treatment_dataset(
+        train_path=train_path,
+        audit_sample_path=sample_path,
+        audited_json_path=audit_json,
+        output_path=treatment_path,
+        summary_path=summary_path,
+        overwrite=True,
+    )
+    output = pd.read_parquet(treatment_path)
     assert len(output) == len(train)
     assert output.iloc[0].original_label == train.iloc[0].original_label
     assert output.iloc[0].treatment_label == "non-bug"
-    outside = audited.copy()
-    outside.loc[0, "issue_id"] = "not-in-training"
-    outside.to_parquet(audit_path)
-    with pytest.raises(ValueError, match="outside the frozen training split"):
-        build_treatment_dataset(str(train_path), str(audit_path), str(tmp_path / "bad.parquet"), str(tmp_path / "bad.json"))
+
+    bad_record = dict(record)
+    bad_record["issue_id"] = "not-in-training"
+    bad_json = tmp_path / "bad.json"
+    bad_json.write_text(json.dumps([bad_record]))
+    with pytest.raises(ValueError, match="outside"):
+        build_treatment_dataset(
+            train_path=train_path,
+            audit_sample_path=sample_path,
+            audited_json_path=bad_json,
+            output_path=tmp_path / "bad.parquet",
+            summary_path=tmp_path / "bad_summary.json",
+            overwrite=True,
+        )
