@@ -72,7 +72,7 @@ Before changing anything:
 
 # 3. Current Project Status
 
-## Phase I — Data Preparation + EDA
+## Current phase — Audit-backed treatment experiment and application
 
 Completed:
 
@@ -100,29 +100,16 @@ Canonical dataset finalized
 EDA implementation
 ```
 
-Current working phase:
+Completed and retained stages include:
 
 ```text
-PHASE I — DATA PREPARATION + EDA
+Canonical dataset and EDA; frozen split; training-only aggregate graph;
+1,000-record single-call audit; initial DeBERTa-v3 + XGBoost treatment model
 ```
 
-Next major phase:
-
-```text
-Knowledge Graph Construction
-```
-
-Then:
-
-```text
-Multi-Agent Label Auditing
-```
-
-Then:
-
-```text
-DeBERTa-v3 + XGBoost + SHAP
-```
+The active follow-up is to retrain treatment with the tuned baseline's XGBoost
+settings, then regenerate and verify the paired comparison. Do not describe the
+existing treatment metrics as a fully controlled comparison yet.
 
 ---
 
@@ -661,10 +648,14 @@ Agent-audited labels
 
 # 18. Multi-Agent System
 
-The audit uses four separate LLM API calls per issue: one each for the Semantic,
-Structural/KG, and Skeptic auditors, followed by a separate Judge call. Distinct
-calls preserve role-specific outputs; do not claim statistical independence when
-agents share a provider or model.
+The completed 1,000-record audit uses one LLM API call per issue. That response
+contains Policy/Semantic, Data/Structural-KG, Pattern/Skeptic, and Judge
+perspectives. These are role-separated outputs from one model response, not four
+calls or statistically independent measurements. The retained records use audit
+method `single_model_four_perspective_one_call`. Preserve each perspective and
+the Judge output separately in stored records. The audit prompt includes the
+original source label as context; possible label anchoring is a validity
+limitation and must not be omitted from research reporting.
 
 Planned agents:
 
@@ -2008,31 +1999,32 @@ unless explicitly required.
 
 ---
 
-# 57. Current Priority
+# 57. Current Priority (verified 2026-10-28)
 
 Current state:
 
 ```text
-Canonical dataset and EDA complete
-Frozen 70/15/15 split available (seed 42)
-Training-only aggregate Knowledge Graph rebuilt
-Historical Kaggle baseline exists; its test identity hash is not confirmed
-Fresh fixed-split, GPU-only Kaggle baseline notebook is running
-New four-call audit has 0 labels because Gemini project access returned HTTP 403
+Canonical dataset and EDA complete (926,461 rows)
+Frozen 70/15/15 split available (seed 42): 648,424 / 138,948 / 138,949
+Training-only aggregate Knowledge Graph rebuilt: 2,571 nodes / 2,570 edges
+Tuned baseline evaluated on CUDA; test identity SHA-256 is recorded
+Single-call four-perspective audit completed for 1,000 training rows; 170 Judge labels changed
+Treatment dataset and model exist; original labels and held-out labels are preserved
+Treatment and tuned baseline test identities match, but XGBoost configurations differ
 ```
 
 Next priorities:
 
 ```text
-Obtain eligible provider access and complete 1,000 training-only audits
-Rebuild treatment labels using Judge labels for audited train rows only
-Collect fresh baseline output and verify its frozen split hashes
-Train/evaluate treatment against identical frozen split identities in Kaggle
-Record and compare matching test identity hashes and metrics
+Retrain treatment with the tuned baseline XGBoost parameters and threshold-selection protocol
+Regenerate and verify the paired comparison figures and metrics
+Update the paper with the implemented one-call protocol and current results
+Retain human adjudication, leakage checks, and statistical uncertainty as limitations
 ```
 
-Do not jump directly to model training while foundational data and label-auditing
-stages remain unfinished.
+Do not describe the retained treatment/baseline metric contrast as a controlled
+comparison until treatment uses matched tuned classifier parameters and the
+same threshold-selection protocol.
 
 ---
 
