@@ -161,7 +161,6 @@ def build_agent_pool(models: list[str] | None = None) -> list[FourPerspectiveAge
         "openai/gpt-oss-20b",
         "qwen/qwen3.8-27b",
     ]
-    # Dynamically find all GROQ_API_KEY, GROQ_API_KEY_2, GROQ_API_KEY_3, etc.
     groq_key_envs = ["GROQ_API_KEY"] + sorted(
         [k for k in os.environ if k.startswith("GROQ_API_KEY_") and os.environ[k]],
         key=lambda x: int(x.split("_")[-1]) if x.split("_")[-1].isdigit() else 99,
@@ -183,9 +182,10 @@ async def run_audit(
     parquet_path: Path,
     seed_json: Path | None = None,
     limit: int | None = None,
-    delay_seconds: float = 2.0,
+    delay_seconds: float = 0.5,
     models: list[str] | None = None,
     checkpoint_every: int = 10,
+    concurrency: int = 4,
 ) -> None:
     print(f"Loading candidate sample: {sample_parquet}...", flush=True)
     sample_df = pd.read_parquet(sample_parquet)
@@ -219,70 +219,96 @@ async def run_audit(
     agents = build_agent_pool(models)
     active_names = [f"{a.provider}:{getattr(a, 'api_key_env', '').replace('GROQ_API_KEY_', 'k').replace('GROQ_API_KEY', 'k1')}:{a.model.split('/')[-1]}" for a in agents]
     print(f"Active agent pool ({len(agents)} instances): {active_names}", flush=True)
-    print(f"Pacing delay: {delay_seconds}s between calls; Checkpoint every {checkpoint_every} records.", flush=True)
+    print(f"Concurrency: {concurrency} workers; Delay: {delay_seconds}s; Checkpoint every {checkpoint_every} records.", flush=True)
 
     audited_count = len(existing_records)
     new_records = list(existing_records)
     cooldowns: dict[str, float] = {}
 
+    queue: asyncio.Queue[tuple[int, dict[str, Any]]] = asyncio.Queue()
     for idx, (_, row) in enumerate(to_audit.iterrows()):
-        issue = row.to_dict()
-        record = None
-        attempt = 0
-        while record is None:
-            now = asyncio.get_event_loop().time()
-            avail = [a for a in agents if cooldowns.get(f"{a.api_key_env}:{a.model}", 0.0) <= now]
-            if not avail:
-                earliest = min(cooldowns.values()) if cooldowns else now + 30.0
-                wait_sec = max(5.0, min(earliest - now, 120.0))
-                print(f"[Wait all pool] All models in cooldown, waiting {wait_sec:.1f}s before retrying...", flush=True)
-                await asyncio.sleep(wait_sec)
-                continue
+        queue.put_nowait((idx, row.to_dict()))
 
-            agent = avail[(idx + attempt) % len(avail)]
-            slot_id = f"{agent.api_key_env}:{agent.model}"
-            attempt += 1
+    lock = asyncio.Lock()
+    checkpoint_lock = asyncio.Lock()
+    agent_round_robin = 0
+
+    async def worker(worker_id: int):
+        nonlocal agent_round_robin, audited_count
+        while True:
             try:
-                record = await agent.evaluate_issue(issue)
-            except Exception as e:
-                err_str = str(e)
-                wait_time = 15.0
-                m_match = re.search(r"try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s", err_str)
-                if m_match:
-                    mins = float(m_match.group(1) or 0)
-                    secs = float(m_match.group(2) or 0)
-                    wait_time = mins * 60 + secs + 2.0
-                elif any(m in err_str.lower() for m in ("daily limit", "quota", "per day", "tokens per day")):
-                    wait_time = 900.0  # 15 minutes cooldown for daily quota hits
+                task_idx, issue = queue.get_nowait()
+            except asyncio.QueueEmpty:
+                break
 
-                cooldowns[slot_id] = asyncio.get_event_loop().time() + wait_time
-                short_name = f"{getattr(agent, 'api_key_env', '').replace('GROQ_API_KEY_', 'k').replace('GROQ_API_KEY', 'k1')}:{agent.model.split('/')[-1]}"
-                print(f"[Cooldown {short_name}] ({wait_time:.0f}s): {err_str[:45]}...", flush=True)
-                await asyncio.sleep(0.3)
+            record = None
+            attempt = 0
+            while record is None:
+                async with lock:
+                    now = asyncio.get_event_loop().time()
+                    avail = [a for a in agents if cooldowns.get(f"{a.api_key_env}:{a.model}", 0.0) <= now]
+                    if not avail:
+                        earliest = min(cooldowns.values()) if cooldowns else now + 15.0
+                        wait_sec = max(2.0, min(earliest - now, 60.0))
+                        need_wait = True
+                    else:
+                        need_wait = False
+                        agent_round_robin += 1
+                        agent = avail[agent_round_robin % len(avail)]
 
-        new_records.append(record.model_dump())
-        audited_count += 1
-        flip_tag = " [FLIPPED]" if record.label_flipped else ""
-        print(f"[{audited_count}/{len(sample_df)}] ({record.audit_model.split('/')[-1]}) {record.project} {record.issue_id}: {record.original_label} -> {record.judge_label}{flip_tag}", flush=True)
+                if need_wait:
+                    await asyncio.sleep(wait_sec)
+                    continue
 
-        if len(new_records) % checkpoint_every == 0:
-            save_checkpoint(new_records, json_path, parquet_path)
+                slot_id = f"{agent.api_key_env}:{agent.model}"
+                attempt += 1
+                try:
+                    record = await agent.evaluate_issue(issue)
+                except Exception as e:
+                    err_str = str(e)
+                    wait_time = 15.0
+                    m_match = re.search(r"try again in (?:(\d+)m)?(\d+(?:\.\d+)?)s", err_str)
+                    if m_match:
+                        mins = float(m_match.group(1) or 0)
+                        secs = float(m_match.group(2) or 0)
+                        wait_time = mins * 60 + secs + 2.0
+                    elif any(m in err_str.lower() for m in ("daily limit", "quota", "per day", "tokens per day")):
+                        wait_time = 900.0
 
-        await asyncio.sleep(delay_seconds)
+                    async with lock:
+                        cooldowns[slot_id] = asyncio.get_event_loop().time() + wait_time
+                        short_name = f"{getattr(agent, 'api_key_env', '').replace('GROQ_API_KEY_', 'k').replace('GROQ_API_KEY', 'k1')}:{agent.model.split('/')[-1]}"
+                        print(f"[Cooldown {short_name}] ({wait_time:.0f}s): {err_str[:45]}...", flush=True)
+                    await asyncio.sleep(0.2)
+
+            async with checkpoint_lock:
+                new_records.append(record.model_dump())
+                audited_count += 1
+                flip_tag = " [FLIPPED]" if record.label_flipped else ""
+                print(f"[{audited_count}/{len(sample_df)}] (W{worker_id}:{record.audit_model.split('/')[-1]}) {record.project} {record.issue_id}: {record.original_label} -> {record.judge_label}{flip_tag}", flush=True)
+
+                if len(new_records) % checkpoint_every == 0:
+                    save_checkpoint(new_records, json_path, parquet_path)
+
+            queue.task_done()
+            await asyncio.sleep(delay_seconds)
+
+    workers = [asyncio.create_task(worker(i + 1)) for i in range(concurrency)]
+    await asyncio.gather(*workers)
 
     save_checkpoint(new_records, json_path, parquet_path)
-    print(f"Audit run complete! Total records audited: {len(new_records)}")
+    print(f"Audit run complete! Total records audited: {len(new_records)}", flush=True)
 
     if len(new_records) >= len(sample_df):
-        print("\nAll sample records audited! Auto-building treatment training dataset...")
+        print("\nAll sample records audited! Auto-building treatment training dataset...", flush=True)
         from src.treatment.build_treatment_dataset import build_treatment_dataset
         summary = build_treatment_dataset(
             audit_sample_path=sample_parquet,
             audited_json_path=json_path,
             overwrite=True,
         )
-        print("Treatment training dataset build completed successfully!")
-        print(f"Summary: {summary}")
+        print("Treatment training dataset build completed successfully!", flush=True)
+        print(f"Summary: {summary}", flush=True)
 
 
 if __name__ == "__main__":
@@ -292,8 +318,9 @@ if __name__ == "__main__":
     parser.add_argument("--parquet-path", type=Path, default=Path("data/processed/audited_train_10000_labels.parquet"), help="Output Parquet path")
     parser.add_argument("--seed-json", type=Path, default=Path("outputs/results/audited_train_1000_onecall/audited_records.json"), help="Optional seed JSON of already audited records")
     parser.add_argument("--limit", type=int, default=None, help="Max records to audit in this run")
-    parser.add_argument("--delay", type=float, default=2.0, help="Delay between calls in seconds")
+    parser.add_argument("--delay", type=float, default=0.5, help="Delay between calls per worker in seconds")
     parser.add_argument("--checkpoint-every", type=int, default=10, help="Checkpoint save frequency")
+    parser.add_argument("--concurrency", type=int, default=4, help="Number of concurrent workers")
     parser.add_argument("--models", nargs="+", default=None, help="Models to rotate")
     args = parser.parse_args()
 
@@ -306,4 +333,5 @@ if __name__ == "__main__":
         delay_seconds=args.delay,
         models=args.models,
         checkpoint_every=args.checkpoint_every,
+        concurrency=args.concurrency,
     ))

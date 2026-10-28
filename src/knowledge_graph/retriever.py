@@ -23,6 +23,9 @@ class KnowledgeGraphRetriever:
         self.project_stats = self.df.groupby("_project_key")["_is_bug"].agg(["sum", "count"])
         self.component_stats = self.df.groupby(["_project_key", "_component_key"])["_is_bug"].agg(["sum", "count"])
         self.severity_stats = self.df.groupby(["_source_key", self.df["severity"].fillna("").astype(str).str.casefold()])["_is_bug"].agg(["sum", "count"])
+        self._identity_bug_map: dict[tuple[str, str, str], bool] = dict(
+            zip(zip(self.df["_source_key"], self.df["_project_key"], self.df["issue_id"]), self.df["_is_bug"])
+        )
 
     @staticmethod
     def _loo(stats: pd.DataFrame, key: Any, current_is_bug: bool) -> tuple[int, int]:
@@ -42,31 +45,28 @@ class KnowledgeGraphRetriever:
         component = str(issue.get("component") or "").casefold()
         source = str(issue.get("source") or "").casefold()
         issue_id = str(issue.get("issue_id") or "")
-        rows = self.df[
-            self.df["_project_key"].eq(project)
-            & self.df["_source_key"].eq(source)
-            & self.df["issue_id"].eq(issue_id)
-        ]
-        current_is_bug = bool(rows.iloc[0]["_is_bug"]) if len(rows) else False
+
+        target_bug_val = self._identity_bug_map.get((source, project, issue_id))
+        is_known = target_bug_val is not None
+        current_is_bug = bool(target_bug_val) if is_known else False
         evidence: list[str] = []
 
-        bugs, total = self._loo(self.project_stats, project, current_is_bug if len(rows) else False)
+        bugs, total = self._loo(self.project_stats, project, current_is_bug if is_known else False)
         line = self._format_prior("project context", bugs, total)
         if line:
             evidence.append(line)
 
         if component:
-            bugs, total = self._loo(self.component_stats, (project, component), current_is_bug if len(rows) else False)
+            bugs, total = self._loo(self.component_stats, (project, component), current_is_bug if is_known else False)
             line = self._format_prior("project-component context", bugs, total)
             if line:
                 evidence.append(line)
 
         severity = str(issue.get("severity") or "").casefold()
         if severity:
-            # Resolve the current training-group count and leave the target record out.
             key = (source, severity)
             stat_bugs, stat_count = self.severity_stats.loc[key].tolist() if key in self.severity_stats.index else (0, 0)
-            if len(rows):
+            if is_known:
                 stat_bugs, stat_count = int(stat_bugs) - int(current_is_bug), int(stat_count) - 1
             line = self._format_prior("source-severity context", int(stat_bugs), int(stat_count))
             if line:
