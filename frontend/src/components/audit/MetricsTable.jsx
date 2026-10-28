@@ -9,7 +9,7 @@ const meanings = {
   'Brier Score': 'How close confidence probabilities are to outcomes.',
 };
 
-export default function MetricsTable({ metrics, treatmentStatus = 'unavailable' }) {
+export default function MetricsTable({ metrics, treatmentStatus = 'unavailable', comparable = false }) {
   const treatmentUnavailable = treatmentStatus === 'blocked' ? 'Blocked' : 'Unavailable';
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -33,7 +33,7 @@ export default function MetricsTable({ metrics, treatmentStatus = 'unavailable' 
               <td className="p-4 font-semibold text-slate-800"><span title={meanings[metric.label]} className="cursor-help border-b border-dotted border-slate-400">{metric.label}</span></td>
               <td className="p-4 text-slate-600">{hasBaseline ? metric.baseline.toFixed(3) : 'Unavailable'}</td>
               <td className="p-4 text-slate-500">{hasTreatment ? metric.treatment.toFixed(3) : treatmentUnavailable}</td>
-              <td className={`p-4 font-semibold ${better ? 'text-emerald-700' : 'text-slate-500'}`}>{hasBoth ? `${change >= 0 ? '+' : '-'} ${Math.abs(change).toFixed(3)}` : treatmentUnavailable}</td>
+              <td className={`p-4 font-semibold ${better ? 'text-emerald-700' : 'text-slate-500'}`}>{hasBoth && comparable ? `${change >= 0 ? '+' : '-'} ${Math.abs(change).toFixed(3)}` : hasBoth ? 'Not comparable' : treatmentUnavailable}</td>
             </tr>
           );
         })}</tbody>
