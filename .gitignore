@@ -14,6 +14,13 @@ sgent.env.txt
 # Large binary datasets & embeddings (>100MB exceeds GitHub limits)
 *.parquet
 *.parquet.gz
+!data/processed/fixed_splits/train.parquet
+!data/processed/fixed_splits/validation.parquet
+!data/processed/fixed_splits/test.parquet
+data/processed/backup_splits/
+data/processed/fixed_splits/treatment_train.parquet
+!data/processed/audit_train_sample.parquet
+!data/processed/audit_train_sample_1000_from_5000.parquet
 bughubs_canonical.parquet
 data/embeddings/
 *.npy
