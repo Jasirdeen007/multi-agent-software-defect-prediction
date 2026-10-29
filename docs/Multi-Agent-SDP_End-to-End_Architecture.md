@@ -6,6 +6,29 @@
 **Core task:** Software Defect Prediction (SDP) with multi-agent label
 auditing.
 
+## Implementation status — 2026-10-28
+
+The current completed audit is **one LLM call per issue returning four
+perspectives** (Policy, Data/KG, Pattern/Skeptic, and Judge). It is not four
+independent calls. The prompt includes the original source label as context;
+possible label anchoring must be reported as a validity limitation.
+
+The retained audit covers 1,000 frozen training identities, with 170 Judge
+labels changed. The treatment dataset preserves every `original_label`, changes
+only audited training targets, and leaves validation/test labels untouched. The
+initial treatment model is available, and its test identity hash matches the
+tuned baseline. However, it was trained with the regular XGBoost configuration,
+while the baseline uses tuned parameters. A matched treatment retrain is needed
+before interpreting the metric comparison as isolating the effect of label
+replacement. Current results and artifact paths are in the repository README.
+
+The ASCII architecture below is a conceptual overview, not a fully current
+execution diagram: its separate Policy/Data/Pattern/Judge boxes must be read as
+perspectives within one API call. It also omits the frozen split boundary and
+training-only restriction on the audit/graph. A publication-ready figure should
+show those boundaries and mark the model comparison as pending a matched
+classifier configuration.
+
 The central experimental question is whether **agent-audited issue
 labels**, produced before model training, provide a measurable change in
 downstream software defect prediction compared with the original BugHub

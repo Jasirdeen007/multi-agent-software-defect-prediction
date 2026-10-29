@@ -1,6 +1,16 @@
 # Multi-Agent-SDP — Phase I Review
 ## 7-Page PPT-Ready Research Content
 
+> **Implementation status (2026-10-28):** The current completed audit uses one
+> LLM call per issue to return Policy, Data/KG, Pattern/Skeptic, and Judge
+> perspectives. It covers 1,000 training-only records; 170 Judge labels changed.
+> An initial treatment model and metrics are retained. The treatment and tuned
+> baseline use matching test identities, but different XGBoost configurations,
+> so a controlled metric comparison still requires a matched treatment rerun.
+> Sections below contain research rationale and proposed workflow material as
+> well as implementation guidance; treat any conflicting descriptions of
+> independent calls as conceptual/proposed, not the current executed protocol.
+
 > **Project research statement:** Multi-Agent-SDP proposes a multi-agent label-auditing framework for heterogeneous software issue reports. The audited labels are subsequently used to train a DeBERTa-v3 + XGBoost software defect prediction model, with SHAP for explanation. Human-in-the-loop review belongs to the **inference/operational phase** and is therefore stated separately rather than included in the current training-time architecture.
 
 ---
@@ -303,9 +313,9 @@ The multi-LLM disagreement literature provides methodological support for concen
 
 ---
 
-## Phase 3 — Knowledge-Guided Agent Council
+## Phase 3 — Knowledge-Guided Audit Perspectives (implemented as one call)
 
-Each selected issue is evaluated independently by:
+For the completed run, one model call returns structured decisions for:
 
 ```text
 Policy Agent
@@ -313,7 +323,7 @@ Data Agent
 Pattern Agent
 ```
 
-The agents receive the issue text and the relevant structured/Knowledge-Graph evidence.
+The call receives the issue text and relevant structured/Knowledge-Graph evidence. The original source label is also included in the prompt as context, which may anchor the generated audit decisions and must be acknowledged as a limitation.
 
 Each agent returns structured output:
 
@@ -329,9 +339,9 @@ The outputs are retained separately for traceability.
 
 ---
 
-## Phase 4 — Judge
+## Phase 4 — Judge Perspective
 
-The Judge receives the independent agent outputs and supporting evidence.
+The Judge perspective is returned in the same model response after the three auditor perspectives; it is not a separate API call in the completed protocol.
 
 Conceptually:
 
@@ -341,7 +351,7 @@ Data ───┼──→ Judge → audited silver label
 Pattern ┘
 ```
 
-Agreement/disagreement is retained as an audit signal.
+Agreement/disagreement among the generated perspectives is retained as an audit signal, but it is not independent inter-rater evidence because the perspectives come from one call.
 
 **The exact confidence thresholds and routing rules are experimental parameters and must be validated rather than presented as established facts.**
 

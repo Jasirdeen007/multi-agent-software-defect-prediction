@@ -8,7 +8,10 @@ const formatNumber = (value) => new Intl.NumberFormat('en-US').format(value);
 
 function DatasetInsights() {
   const [stats, setStats] = useState(null);
-  useEffect(() => { getDatasetStats().then(setStats); }, []);
+  const [error, setError] = useState('');
+  const load = () => { setError(''); getDatasetStats().then(setStats).catch((err) => setError(err.message || 'Dataset summary could not be loaded.')); };
+  useEffect(load, []);
+  if (error) return <div role="alert" className="rounded-2xl border border-rose-200 bg-white p-8"><h1 className="text-xl font-bold">Dataset summary unavailable</h1><p className="mt-2 text-sm text-slate-600">{error}</p><button onClick={load} className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white">Retry</button></div>;
   if (!stats) return <Loading />;
   return (
     <>

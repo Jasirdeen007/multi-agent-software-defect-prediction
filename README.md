@@ -2,7 +2,7 @@
 
 This research project studies whether auditing BugHub issue labels with language-model reasoning can improve a Software Defect Prediction (SDP) classifier.
 
-The experiment compares two models trained on the **same training issues and text features**:
+The experiment is designed to compare two models trained on the **same training identities and text features**, changing only training labels. The retained model artifacts share test identities, but their XGBoost configurations differ; a matched treatment rerun is still needed before claiming a controlled comparison.
 
 - **Baseline:** BugHub's original source label for every training issue.
 - **Treatment:** the Judge label for audited training issues and the original label for all other training issues.
@@ -27,7 +27,7 @@ flowchart TD
     K --> L[FastAPI and React inference dashboard]
 ```
 
-## Current state — 26 October 2026
+## Current state — 28 October 2026
 
 | Stage | State and outcome |
 |---|---|
@@ -36,16 +36,15 @@ flowchart TD
 | Baseline | Locally trained and tuned on CUDA using the frozen split. Current held-out accuracy 0.8043, ROC-AUC 0.8561, macro-F1 0.7546. Model/results are retained under `outputs/models/baseline/fixed_split/tuned_xgboost/` and `outputs/results/baseline/fixed_split/tuned_xgboost/`. |
 | Knowledge Graph | Rebuilt from the 648,424 frozen training rows only. The audit retriever now reads this split and excludes each target issue from its own label-derived priors. Artifacts are under `outputs/knowledge_graph/train_only/`. |
 | Audit sampling | 5,000 training-only candidates across 79 projects; a nested, stratified 1,000-record sample was selected. |
-| Agent audit | The new runner is configured for 1,000 unique training-only candidates and four separate role calls. The first attempt produced **0 audited labels**: Gemini returned HTTP 403 stating its free tier is unavailable for the supplied project. The earlier audit outputs from 20-record and 200-record protocols have been removed because they do not meet the current four-separate-call audit protocol. |
-| Treatment dataset | To be rebuilt after the new 1,000-record audit completes: full training split, Judge labels for audited rows, original labels elsewhere. |
-| Paired treatment training/evaluation | Pending audit completion and treatment dataset rebuild. No current baseline-versus-treatment conclusion is available. |
-| Application | FastAPI backend and React frontend are present; production readiness is a separate task. |
+| Agent audit | Complete for 1,000 training-only records using **one LLM call that returns Policy, Data, Pattern, and Judge perspectives**. 170 Judge labels differ from the preserved source labels (17%). The perspectives are not independent model calls or statistical measurements. |
+| Treatment dataset | Built from all 648,424 frozen training records. Judge labels are used for the 1,000 audited identities; source labels remain for the other 647,424. Original labels are preserved; validation and test labels are unchanged. |
+| Treatment model | Trained and evaluated on the frozen 138,949-row test set. Accuracy 0.7850, balanced accuracy 0.7183, macro-F1 0.7291, ROC-AUC 0.8300, MCC 0.4644, Brier score 0.1483. Artifacts are under `outputs/models/treatment/` and `outputs/results/treatment/`. |
+| Comparison status | Treatment and tuned baseline metrics have matching test identity hashes, but treatment uses the regular `baseline_config.yaml` XGBoost settings while baseline uses separately tuned parameters. Treat their metric contrast as **not a fully controlled matched-model comparison** until treatment is retrained with the tuned baseline parameters. The existing comparison chart uses older baseline metrics and must not be presented as the current tuned comparison. |
+| Application | FastAPI backend and React frontend are present. Treatment inference uses the local treatment model; low-confidence review and OOD detection remain disabled pending validated thresholds. |
 
 ### Current audit and treatment counts
 
-The selected 1,000-record candidate sample is nested within the 5,000-record training sample and stratified by project and original label. All 1,000 identities were verified to be unique and in the frozen training split. The separate-call audit has not produced labels yet. Its eventual completion count will be recorded in `data/processed/audited_train_1000_independent_calls_labels.parquet`.
-
-The supplied Gemini credentials were rejected with HTTP 403 because the associated project does not have Gemini free-tier access. No treatment dataset should be rebuilt from this failed run. No valid audit labels or treatment dataset/model artifacts are currently retained. The earlier outputs from incompatible audit protocols were removed.
+The selected 1,000-record audit sample is nested within the 5,000-record training sample, stratified by project and original label, and verified to contain unique identities from the frozen training split. The completed audit records are in `outputs/results/audited_train_1000_onecall/audited_records.json`; the treatment dataset summary is in `outputs/results/treatment/treatment_dataset_summary_current.json`.
 
 The new training-only graph is built with `python -m src.knowledge_graph.build_training_kg`. It reads only `data/processed/fixed_splits/train.parquet`; the retriever excludes the current issue's original label from its own project/component/severity rates. The previous mixed-split graph artifacts are historical and are not used by the new audit retriever.
 
@@ -82,7 +81,7 @@ The current baseline is the 15-trial tuned CUDA XGBoost model selected on valida
 
 ### Treatment
 
-No treatment dataset or trained treatment model is currently retained. After the valid four-call audit completes, build a treatment dataset from the complete frozen training split using:
+The retained treatment dataset and model use the completed one-call, four-perspective audit. For each audited training identity, the Judge label replaces the training target; other training rows retain their source label:
 
 ```text
 if identity has a valid Judge audit:
@@ -91,7 +90,7 @@ else:
     treatment_label = original_label
 ```
 
-Keep `original_label` unchanged. Then train with the same DeBERTa embeddings, XGBoost settings, training identities, validation set, and untouched test identities as the baseline. The intended experimental difference is the training target labels.
+Keep `original_label` unchanged. The retained treatment uses the same frozen split identities and DeBERTa text embeddings, but its saved run used the regular `baseline_config.yaml` XGBoost configuration rather than the tuned baseline parameters. Retrain it with the tuned parameters and the same validation-based threshold-selection policy before interpreting the paired results as isolating label changes.
 
 Do not interpret a gain in predictive metrics as proof that the audit labels are correct. Without an independently verified label set, the experiment measures downstream model changes associated with this label-replacement procedure.
 
@@ -110,13 +109,15 @@ Retriever:         src/knowledge_graph/retriever.py
 
 The micro graph represents issue, project, source, component, severity, priority, status, and resolution relationships. The macro graph contains project/component/label relations and aggregated statistics. The retriever supplies project, component, severity, and graph-cluster context to audit prompts. For controlled evaluation, label-derived statistics must be built from training data only.
 
-The current audit protocol uses four separate calls per issue:
+The completed audit protocol uses one LLM API call per issue and returns four role perspectives:
 
 ```text
-Semantic Auditor + Skeptic Auditor + Structural/KG Auditor + Judge
+Policy perspective + Data/KG perspective + Pattern/Skeptic perspective + Judge decision
 ```
 
-The first three calls run independently of the Judge call; the Judge receives their verdicts and evidence, but not the original source label. “Separate calls” describes the execution protocol; shared providers/models do not establish statistical independence. The output preserves each verdict and rationale, the Judge decision, original label, confidence scores, and label-change flag.
+These are structured roles within one model response, not separate calls or statistically independent agents. The retained audit records identify the method as `single_model_four_perspective_one_call`.
+
+One model call produces the three perspective outputs and Judge decision. The saved record preserves each perspective and rationale, the source label, confidence fields, audit method, and label-change flag. The audit prompt includes the original source label as context, so label anchoring is a validity limitation. The confidence values have not been established as calibrated probabilities.
 
 ## Reproduce the workflow
 
@@ -155,27 +156,28 @@ python -m src.audit_sampling.create_audit_sample --dataset data/processed/audit_
 
 ### Run or resume an audit
 
-Build the training-only graph first, then run the four separate agent calls. Configure the role-specific API credentials through the environment variable names in `configs/agents_config.yaml`; do not put secrets in version-controlled files. The supplied Gemini project currently returns HTTP 403 because its free tier is unavailable, so the full audit remains blocked until eligible Gemini credentials/access are available.
+Build the training-only graph first, then use the one-call four-perspective audit runner when repeating the audit. Configure provider credentials through environment variables; do not put secrets in version-controlled files. The retained completed audit is the one-call run described above. `src/agents/orchestrator.py` represents the older separate-call workflow; its failed attempt is not the source of treatment labels.
 
 ```powershell
 python -m src.knowledge_graph.build_training_kg
-python -m src.agents.orchestrator --config configs/agents_config.yaml --batch-size 5
+python -m src.agents.audit_remaining_800
 ```
 
-The orchestrator skips identities already present in its audited Parquet checkpoint. Check that provider access works before starting a long run.
+The completed records are retained at `outputs/results/audited_train_1000_onecall/audited_records.json`. The command above is for rerunning/resuming this one-call audit path; check provider access and its configured checkpoint paths before launching it. The separate-call orchestrator is not the method used for current treatment labels.
+
+The audit runner's automatic treatment-build callback currently invokes the dataset builder without overriding its older separate-call JSON default. If rerunning from scratch, verify that callback's input path or run the explicit treatment-build command below with `--audited-json outputs/results/audited_train_1000_onecall/audited_records.json`.
 
 ### Build and train the treatment
 
 After auditing with a train-only graph, rebuild the treatment dataset from the complete frozen training split. `--overwrite` is needed when rebuilding an existing file.
 
 ```powershell
-python -m src.treatment.build_treatment_dataset --overwrite
-python -m src.baseline.run_baseline --config configs/baseline_fixed_split_config.yaml
+python -m src.treatment.build_treatment_dataset --audited-json outputs/results/audited_train_1000_onecall/audited_records.json --overwrite
 python -m src.treatment.train_treatment_model --dataset-path data/processed/fixed_splits/treatment_train.parquet --config configs/baseline_config.yaml
-python -m src.treatment.compare_baseline_treatment
+python -m src.treatment.compare_baseline_treatment --baseline-metrics outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json --treatment-metrics outputs/results/treatment/metrics.json
 ```
 
-The comparison script checks the test-set identity hash and test row count. If either differs or is missing, it refuses to produce a valid paired comparison. Save the resulting metrics and audit API usage with the experiment configuration and graph version.
+The treatment command above reproduces the retained treatment configuration; it does not yet match the tuned baseline parameters. Do not use its generated chart to claim an isolated label-treatment effect. First train treatment with the tuned baseline XGBoost parameters and threshold-selection procedure. The comparison script checks matching test identity hashes and row counts, but those checks alone do not ensure matched model configurations.
 
 ## Existing outputs
 
@@ -185,15 +187,15 @@ The comparison script checks the test-set identity hash and test row count. If e
 | Nested 1,000 candidate sample | `data/processed/audit_train_sample_1000_from_5000.parquet` |
 | 5,000 training-only candidates | `data/processed/audit_train_sample.parquet` |
 | Nested 1,000 audit candidates | `data/processed/audit_train_sample_1000_from_5000.parquet` |
-| Audit completion | 0 valid labels from the current four-call attempt; see `outputs/logs/audit_1000_independent_calls.log` |
-| Treatment dataset/model | Not built from the current audit; prior incompatible outputs were removed |
+| Audit completion | 1,000 records from the one-call four-perspective run: `outputs/results/audited_train_1000_onecall/audited_records.json` |
+| Treatment dataset/model | Retained one-call treatment artifacts: `data/processed/fixed_splits/treatment_train.parquet`, `outputs/results/treatment/`, and `outputs/models/treatment/` |
 | Current tuned baseline metrics | `outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json` |
 
-The selected candidate samples remain available to resume the audit. Treatment data and models should be regenerated only after valid Judge labels are available.
+The selected candidate samples and completed audit records are retained for reproducibility. Rebuild the treatment dataset only from valid Judge labels that match the frozen training audit sample.
 
 ### Shared data files
 
-The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The historical 1,000-row audit output is tracked at `outputs/results/audited_train_1000_onecall/audited_records.json`; it was produced by a single-call four-perspective protocol and is not the current four-separate-call audit, so do not use it as the current treatment labels.
+The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The completed 1,000-row single-call, four-perspective audit at `outputs/results/audited_train_1000_onecall/audited_records.json` is the source of current treatment labels.
 
 For the current agent audit, `data/processed/audit_train_sample.parquet` is a reproducible 5,000-row sample from the frozen training split, and `data/processed/audit_train_sample_1000_from_5000.parquet` is the nested 1,000-row audit queue. Both use seed 42 and cover 79 projects; their selection summaries and identity lists are in `outputs/results/audit_sampling/`. One expired 2019 signed-download URL in a sampled issue had its AWS authentication query removed; the issue identity, label, and remaining text were preserved. The older `audit_sample.parquet` was sampled from the full canonical dataset, so it can include validation/test records and must not be used for agent training. The full canonical Parquet is not needed to run the audit or paired model experiment: the frozen split files and training-only samples provide the required inputs.
 
@@ -202,18 +204,18 @@ For the current agent audit, `data/processed/audit_train_sample.parquet` is a re
 Start the backend:
 
 ```powershell
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8001
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 Start the frontend in another shell:
 
 ```powershell
 cd frontend
-$env:VITE_API_BASE_URL="http://127.0.0.1:8001"
-npm run dev -- --host 127.0.0.1
+npm ci
+npm run dev
 ```
 
-The API includes health, project status, dataset/baseline reports, audit overview/cases, model comparison, predictions, and review endpoints. OpenAPI documentation is available at `http://127.0.0.1:8001/docs`; the frontend usually serves at `http://127.0.0.1:5173/`.
+The frontend defaults to the API at `http://127.0.0.1:8000`; override `VITE_API_BASE_URL` when using another port. OpenAPI documentation is available at `http://127.0.0.1:8000/docs`; the frontend usually serves at `http://127.0.0.1:5173/`. Treatment inference is available when the one-call audit provenance, treatment artifacts, and test identity checks pass. Low-confidence review and OOD detection remain disabled until validated thresholds are available. Matching test identities do not by themselves establish a controlled baseline/treatment comparison; treatment must also use the baseline's tuned classifier settings.
 
 ## Data safety and reproducibility rules
 
