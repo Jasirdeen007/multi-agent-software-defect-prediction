@@ -2,109 +2,109 @@
   "accuracy": {
     "display_name": "Accuracy",
     "baseline": 0.7852,
-    "treatment": 0.7848,
-    "delta": -0.0004,
-    "pct_change": -0.05,
+    "treatment": 0.7849,
+    "delta": -0.0003,
+    "pct_change": -0.04,
     "improved": false,
     "lower_is_better": false
   },
   "balanced_accuracy": {
     "display_name": "Balanced Accuracy",
     "baseline": 0.7044,
-    "treatment": 0.7134,
-    "delta": 0.009,
-    "pct_change": 1.28,
+    "treatment": 0.7183,
+    "delta": 0.0139,
+    "pct_change": 1.97,
     "improved": true,
     "lower_is_better": false
   },
   "macro_f1": {
     "display_name": "Macro F1",
     "baseline": 0.7195,
-    "treatment": 0.7257,
-    "delta": 0.0062,
-    "pct_change": 0.86,
+    "treatment": 0.729,
+    "delta": 0.0095,
+    "pct_change": 1.32,
     "improved": true,
     "lower_is_better": false
   },
   "roc_auc": {
     "display_name": "ROC-AUC",
     "baseline": 0.8301,
-    "treatment": 0.8302,
-    "delta": 0.0001,
-    "pct_change": 0.01,
-    "improved": true,
+    "treatment": 0.8299,
+    "delta": -0.0002,
+    "pct_change": -0.02,
+    "improved": false,
     "lower_is_better": false
   },
   "matthews_corrcoef": {
     "display_name": "Matthews Corr (MCC)",
     "baseline": 0.4547,
-    "treatment": 0.4602,
-    "delta": 0.0055,
-    "pct_change": 1.21,
+    "treatment": 0.4642,
+    "delta": 0.0095,
+    "pct_change": 2.09,
     "improved": true,
     "lower_is_better": false
   },
   "precision_bug": {
     "display_name": "Precision (Bug)",
     "baseline": 0.8099,
-    "treatment": 0.8176,
-    "delta": 0.0077,
-    "pct_change": 0.95,
+    "treatment": 0.8219,
+    "delta": 0.012,
+    "pct_change": 1.48,
     "improved": true,
     "lower_is_better": false
   },
   "recall_bug": {
     "display_name": "Recall (Bug)",
     "baseline": 0.9059,
-    "treatment": 0.8916,
-    "delta": -0.0143,
-    "pct_change": -1.58,
+    "treatment": 0.8846,
+    "delta": -0.0213,
+    "pct_change": -2.35,
     "improved": false,
     "lower_is_better": false
   },
   "f1_bug": {
     "display_name": "F1 (Bug)",
     "baseline": 0.8552,
-    "treatment": 0.853,
-    "delta": -0.0022,
-    "pct_change": -0.26,
+    "treatment": 0.8521,
+    "delta": -0.0031,
+    "pct_change": -0.36,
     "improved": false,
     "lower_is_better": false
   },
   "precision_non_bug": {
     "display_name": "Precision (Non-Bug)",
     "baseline": 0.6957,
-    "treatment": 0.6787,
-    "delta": -0.017,
-    "pct_change": -2.44,
+    "treatment": 0.6717,
+    "delta": -0.024,
+    "pct_change": -3.45,
     "improved": false,
     "lower_is_better": false
   },
   "recall_non_bug": {
     "display_name": "Recall (Non-Bug)",
     "baseline": 0.503,
-    "treatment": 0.5352,
-    "delta": 0.0322,
-    "pct_change": 6.4,
+    "treatment": 0.552,
+    "delta": 0.049,
+    "pct_change": 9.74,
     "improved": true,
     "lower_is_better": false
   },
   "f1_non_bug": {
     "display_name": "F1 (Non-Bug)",
     "baseline": 0.5839,
-    "treatment": 0.5984,
-    "delta": 0.0145,
-    "pct_change": 2.48,
+    "treatment": 0.606,
+    "delta": 0.0221,
+    "pct_change": 3.78,
     "improved": true,
     "lower_is_better": false
   },
   "brier_score": {
     "display_name": "Brier Score",
     "baseline": 0.1483,
-    "treatment": 0.1482,
-    "delta": -0.0001,
-    "pct_change": -0.07,
-    "improved": true,
+    "treatment": 0.1483,
+    "delta": 0.0,
+    "pct_change": 0.0,
+    "improved": false,
     "lower_is_better": true
   },
   "experiment_context": {
@@ -114,21 +114,21 @@
       "audit_sample_path": "data\\processed\\audit_train_sample_10000.parquet",
       "audit_records_path": "outputs\\results\\audited_train_10000\\audited_records.json",
       "training_records": 648424,
-      "audited_records": 5010,
-      "unaudited_records": 643414,
-      "audit_coverage_of_training": 0.007726425918843226,
-      "label_changes": 802,
-      "label_change_rate_among_audited": 0.1600798403193613,
+      "audited_records": 10000,
+      "unaudited_records": 638424,
+      "audit_coverage_of_training": 0.015422007822042368,
+      "label_changes": 1573,
+      "label_change_rate_among_audited": 0.1573,
       "original_label_distribution": {
         "bug": 454130,
         "non-bug": 194294
       },
       "treatment_label_distribution": {
-        "bug": 454124,
-        "non-bug": 194300
+        "bug": 453985,
+        "non-bug": 194439
       },
       "audit_methods": {
-        "single_model_four_perspective_one_call": 5010
+        "single_model_four_perspective_one_call": 10000
       },
       "label_policy": "judge_label for audited training issues; original_label for all others",
       "original_label_column_preserved": true,

@@ -41,13 +41,9 @@ class FourPerspectiveAgent(BaseAuditAgent):
     """Returns the three auditor perspectives and Judge decision in one model call."""
 
     def __init__(self, model: str = "openrouter/free", provider: str = "openrouter", **kwargs):
-        if provider == "openrouter":
-            kwargs.setdefault("max_completion_tokens", 1000)
-        elif "openai" in model or "120b" in model or "20b" in model or "free" in model:
-            kwargs.setdefault("max_completion_tokens", 750)
-        else:
-            kwargs.setdefault("max_completion_tokens", 512)
+        kwargs.setdefault("max_completion_tokens", 1024)
         kwargs.setdefault("min_request_interval_seconds", 0.3)
+        kwargs.setdefault("max_retries", 1)
         super().__init__(name="four_perspective_audit", model=model, provider=provider, **kwargs)
 
     async def evaluate_issue(self, issue: dict[str, Any]) -> AuditedIssueRecord:
@@ -248,8 +244,8 @@ async def run_audit(
                     now = asyncio.get_event_loop().time()
                     avail = [a for a in agents if cooldowns.get(f"{a.api_key_env}:{a.model}", 0.0) <= now]
                     if not avail:
-                        earliest = min(cooldowns.values()) if cooldowns else now + 15.0
-                        wait_sec = max(2.0, min(earliest - now, 60.0))
+                        earliest = min(cooldowns.values()) if cooldowns else now + 5.0
+                        wait_sec = max(1.0, min(earliest - now, 10.0))
                         need_wait = True
                     else:
                         need_wait = False
@@ -271,15 +267,17 @@ async def run_audit(
                     if m_match:
                         mins = float(m_match.group(1) or 0)
                         secs = float(m_match.group(2) or 0)
-                        wait_time = mins * 60 + secs + 2.0
+                        wait_time = min(mins * 60 + secs + 1.0, 60.0)
                     elif any(m in err_str.lower() for m in ("daily limit", "quota", "per day", "tokens per day")):
-                        wait_time = 900.0
+                        wait_time = 45.0
+                    else:
+                        wait_time = 10.0
 
                     async with lock:
                         cooldowns[slot_id] = asyncio.get_event_loop().time() + wait_time
                         short_name = f"{getattr(agent, 'api_key_env', '').replace('GROQ_API_KEY_', 'k').replace('GROQ_API_KEY', 'k1')}:{agent.model.split('/')[-1]}"
                         print(f"[Cooldown {short_name}] ({wait_time:.0f}s): {err_str[:45]}...", flush=True)
-                    await asyncio.sleep(0.2)
+                    await asyncio.sleep(0.1)
 
             async with checkpoint_lock:
                 new_records.append(record.model_dump())

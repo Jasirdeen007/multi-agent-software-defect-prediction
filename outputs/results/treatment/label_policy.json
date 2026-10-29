@@ -1,5 +1,5 @@
 {
-  "audited_labels": 5010,
+  "audited_labels": 10000,
   "training_records": 648424,
   "test_identity_sha256": "cc5b147ddba1b01bf252c0ab2d3b0b596bb3674a80458d8f3976208a2f53b0a1",
   "label_policy": "judge_label for audited training issues; original_label otherwise"
