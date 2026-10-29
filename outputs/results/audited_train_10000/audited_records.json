@@ -234152,5 +234152,385 @@
     "audit_model": "qwen/qwen3.8-27b",
     "api_prompt_tokens": 516,
     "api_completion_tokens": 233
+  },
+  {
+    "source": "JIRA",
+    "project": "felix",
+    "issue_id": "12924874",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.95,
+    "policy_reason": "Regression breaks expected cleanup order",
+    "policy_evidence": [
+      "Stop called before ungetService"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.9,
+    "data_reason": "Critical priority and fixed resolution",
+    "data_evidence": [
+      "Status Closed, Resolution Fixed"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.95,
+    "pattern_reason": "Explicit regression and broken behavior",
+    "pattern_evidence": [
+      "Regression from DM3 breaks cleanup"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.93,
+    "judge_reasoning": "All perspectives confirm malfunction due to incorrect method call order.",
+    "judge_evidence": [
+      "Regression breaks ServiceFactory cleanup"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:46:02.130125+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "qwen/qwen3.8-27b",
+    "api_prompt_tokens": 547,
+    "api_completion_tokens": 202
+  },
+  {
+    "source": "GITHUB",
+    "project": "cakephp",
+    "issue_id": "489278513",
+    "original_label": "non-bug",
+    "policy_label": "non-bug",
+    "policy_confidence": 0.9,
+    "policy_reason": "Refactoring request",
+    "policy_evidence": [
+      "Refactor, not malfunction"
+    ],
+    "data_label": "non-bug",
+    "data_confidence": 0.8,
+    "data_reason": "No bug metadata",
+    "data_evidence": [
+      "No bug metadata"
+    ],
+    "pattern_label": "non-bug",
+    "pattern_confidence": 0.85,
+    "pattern_reason": "Enhancement language",
+    "pattern_evidence": [
+      "No error symptoms"
+    ],
+    "judge_label": "non-bug",
+    "judge_confidence": 0.85,
+    "judge_reasoning": "All perspectives indicate refactor, no bug.",
+    "judge_evidence": [
+      "Issue describes replacing callable with Closure"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:46:02.383844+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-20b",
+    "api_prompt_tokens": 608,
+    "api_completion_tokens": 662
+  },
+  {
+    "source": "GITHUB",
+    "project": "nixpkgs",
+    "issue_id": "133389764",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.9,
+    "policy_reason": "malfunction reported",
+    "policy_evidence": [
+      "command not found"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.8,
+    "data_reason": "KG high bug rate",
+    "data_evidence": [
+      "KG bug rate 78.6%"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.9,
+    "pattern_reason": "concrete symptom",
+    "pattern_evidence": [
+      "command not found"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.87,
+    "judge_reasoning": "All perspectives indicate bug",
+    "judge_evidence": [
+      "command not found"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:46:41.615532+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-20b",
+    "api_prompt_tokens": 554,
+    "api_completion_tokens": 646
+  },
+  {
+    "source": "GITHUB",
+    "project": "godot",
+    "issue_id": "287741302",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.95,
+    "policy_reason": "Reports runtime errors and leaks",
+    "policy_evidence": [
+      "ERROR messages and StringName leaks"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.85,
+    "data_reason": "KG shows high bug probability",
+    "data_evidence": [
+      "89.1% bug rate in training data"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.9,
+    "pattern_reason": "Describes concrete errors",
+    "pattern_evidence": [
+      "ERROR: ~List condition true"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.9,
+    "judge_reasoning": "All perspectives indicate a malfunction, consistent bug evidence",
+    "judge_evidence": [
+      "Multiple error messages reported"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:47:20.225045+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-120b",
+    "api_prompt_tokens": 705,
+    "api_completion_tokens": 473
+  },
+  {
+    "source": "GITHUB",
+    "project": "strapi",
+    "issue_id": "367689419",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.9,
+    "policy_reason": "builder fails to create relations",
+    "policy_evidence": [
+      "Content type builder fail generate relations"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.7,
+    "data_reason": "high bug prevalence in similar issues",
+    "data_evidence": [
+      "56.8% bug label in training data"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.85,
+    "pattern_reason": "explicit failure description",
+    "pattern_evidence": [
+      "fail generate relations"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.82,
+    "judge_reasoning": "All perspectives point to a malfunction, not a feature request",
+    "judge_evidence": [
+      "Content type builder fails to generate relations"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:49:34.591292+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-120b",
+    "api_prompt_tokens": 621,
+    "api_completion_tokens": 447
+  },
+  {
+    "source": "GITHUB",
+    "project": "yii2",
+    "issue_id": "1021219948",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.9,
+    "policy_reason": "malfunction observed",
+    "policy_evidence": [
+      "command fails to extract"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.8,
+    "data_reason": "closed bug evidence",
+    "data_evidence": [
+      "issue closed"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.9,
+    "pattern_reason": "concrete extraction failure",
+    "pattern_evidence": [
+      "fails to extract messages"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.87,
+    "judge_reasoning": "All perspectives confirm extraction malfunction",
+    "judge_evidence": [
+      "bug confirmed"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:50:19.620860+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-20b",
+    "api_prompt_tokens": 602,
+    "api_completion_tokens": 648
+  },
+  {
+    "source": "JIRA",
+    "project": "ambari",
+    "issue_id": "12769094",
+    "original_label": "non-bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.95,
+    "policy_reason": "Erroneous logic causes incorrect version setting.",
+    "policy_evidence": [
+      "Erroneous logic sets wrong version"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.9,
+    "data_reason": "Resolved as fixed with major priority.",
+    "data_evidence": [
+      "Status is Resolved with Fixed resolution"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.95,
+    "pattern_reason": "Explicit mention of erroneous logic and fix.",
+    "pattern_evidence": [
+      "Title and text explicitly state 'Fix' and 'erroneous logic'"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.93,
+    "judge_reasoning": "All perspectives agree on bug due to explicit erroneous logic and fix.",
+    "judge_evidence": [
+      "Explicit 'erroneous logic' and 'Fixed' resolution"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": true,
+    "audit_timestamp": "2026-10-29T06:50:30.559695+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "qwen/qwen3.8-27b",
+    "api_prompt_tokens": 528,
+    "api_completion_tokens": 269
+  },
+  {
+    "source": "JIRA",
+    "project": "flex",
+    "issue_id": "12583206",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.9,
+    "policy_reason": "Unexpected warnings indicate malfunction.",
+    "policy_evidence": [
+      "Build emits unsupported style warnings."
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.85,
+    "data_reason": "Minor severity and fixed status confirm defect.",
+    "data_evidence": [
+      "Resolution is Fixed with Minor priority."
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.95,
+    "pattern_reason": "Specific error messages describe incorrect behavior.",
+    "pattern_evidence": [
+      "Warnings cite specific unsupported style names."
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.9,
+    "judge_reasoning": "All perspectives agree on malfunction due to unexpected build warnings.",
+    "judge_evidence": [
+      "Consistent evidence of unexpected compiler warnings."
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:50:58.619682+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "qwen/qwen3.8-27b",
+    "api_prompt_tokens": 678,
+    "api_completion_tokens": 207
+  },
+  {
+    "source": "GITHUB",
+    "project": "kubernetes",
+    "issue_id": "490167350",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.92,
+    "policy_reason": "Deployment status mismatch",
+    "policy_evidence": [
+      "Pods Ready but deployment shows 2/3"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.78,
+    "data_reason": "High bug prior probability",
+    "data_evidence": [
+      "73.9% training issues labeled bug"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.86,
+    "pattern_reason": "Unexpected readiness count",
+    "pattern_evidence": [
+      "Deployment READY differs from pod readiness"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.85,
+    "judge_reasoning": "All perspectives point to unexpected behavior, not a feature request",
+    "judge_evidence": [
+      "Deployment readiness mismatch"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:51:03.536579+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "openai/gpt-oss-120b",
+    "api_prompt_tokens": 709,
+    "api_completion_tokens": 667
+  },
+  {
+    "source": "JIRA",
+    "project": "flink",
+    "issue_id": "13442313",
+    "original_label": "bug",
+    "policy_label": "bug",
+    "policy_confidence": 0.95,
+    "policy_reason": "UI element missing scrollbar is malfunction",
+    "policy_evidence": [
+      "Scrollbar invisible due to CSS calc issue"
+    ],
+    "data_label": "bug",
+    "data_confidence": 0.9,
+    "data_reason": "Resolution fixed confirms defect correction",
+    "data_evidence": [
+      "Status Closed with resolution Fixed"
+    ],
+    "pattern_label": "bug",
+    "pattern_confidence": 0.95,
+    "pattern_reason": "Explicit bug introduction via version bump",
+    "pattern_evidence": [
+      "Angular version bump introduced a bug"
+    ],
+    "judge_label": "bug",
+    "judge_confidence": 0.93,
+    "judge_reasoning": "All perspectives align on UI defect caused by version update.",
+    "judge_evidence": [
+      "Explicit mention of introduced bug and fix"
+    ],
+    "agent_agreement": 1.0,
+    "label_flipped": false,
+    "audit_timestamp": "2026-10-29T06:51:10.630982+00:00",
+    "audit_method": "single_model_four_perspective_one_call",
+    "audit_provider": "groq",
+    "audit_model": "qwen/qwen3.8-27b",
+    "api_prompt_tokens": 580,
+    "api_completion_tokens": 208
   }
 ]
