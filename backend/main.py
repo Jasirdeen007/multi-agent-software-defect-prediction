@@ -565,6 +565,9 @@ def audit_overview() -> dict[str, Any]:
 
 
 def _audit_records_path() -> Path:
+    p10k = PROJECT_ROOT / "outputs/results/audited_train_10000/audited_records.json"
+    if p10k.exists():
+        return p10k
     return PROJECT_ROOT / "outputs/results/audited_train_1000_onecall/audited_records.json"
 
 
