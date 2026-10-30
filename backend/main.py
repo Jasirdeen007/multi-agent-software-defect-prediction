@@ -138,7 +138,7 @@ def get_treatment_readiness() -> dict[str, Any]:
         return {
             "ready": False,
             "status": "blocked",
-            "reason": "Treatment evaluation does not match the paired regularized baseline's held-out test identities.",
+            "reason": "Treatment evaluation does not match the retained baseline's held-out test identities.",
             "auditMethod": audit_method,
         }
     return {
@@ -335,14 +335,14 @@ def load_baseline_report() -> dict[str, Any]:
 
 
 def load_paired_baseline_report() -> dict[str, Any]:
-    """Load the regularized baseline paired with the treatment training config."""
+    """Load retained regular-baseline metrics for a descriptive same-test comparison."""
     path = PROJECT_ROOT / "outputs/results/baseline/full/metrics.json"
     raw = _read_json(path) or {}
     manifest = _read_json(PROJECT_ROOT / "data/processed/fixed_splits/split_manifest.json") or {}
     return {
         "status": "completed" if raw else "unavailable",
         "labelSource": "Original BugHub source labels",
-        "model": "DeBERTa-v3-small frozen embeddings + regularized XGBoost (paired training configuration)",
+        "model": "DeBERTa-v3-small frozen embeddings + regularized XGBoost (configuration match unverified)",
         "inputFeatures": ["model_text"],
         "trackingFields": ["source", "project", "issue_id"],
         "target": "original_label",
@@ -393,21 +393,23 @@ def project_status() -> dict[str, Any]:
     has_treatment = treatment_readiness["ready"]
     has_comparison = (PROJECT_ROOT / "outputs/results/comparison/comparison_summary.json").exists()
     has_audited = bool(_load_audit_records())
-    has_sample = (PROJECT_ROOT / "data/processed/audit_train_sample_1000_from_5000.parquet").exists()
+    sample_summary = _read_json(PROJECT_ROOT / "outputs/results/audit_sampling/audit_train_sample_10000_summary.json") or {}
+    has_sample = sample_summary.get("sample_size_actual") == 10000
     has_kg = (PROJECT_ROOT / "outputs/knowledge_graph/train_only/training_kg.json").exists()
+    audit_count = len(_load_audit_records())
 
     return {
-        "currentStage": "Single-call audit, treatment model, and paired evaluation completed" if treatment_readiness["ready"] else "Treatment experiment requires attention",
+        "currentStage": "10,000-record audit and treatment artifacts available; comparison configuration requires verification" if treatment_readiness["ready"] else "Treatment experiment requires attention",
         "stages": [
             {"name": "Canonical dataset (926,461 issues)", "status": "completed"},
             {"name": "EDA and validation", "status": "completed"},
             {"name": "Original-label baseline (DeBERTa-v3 + XGBoost)", "status": "completed"},
-            {"name": "Selective audit sampling (5,000 stratified issues)", "status": "completed" if has_sample else "pending"},
+            {"name": "Selective audit sampling (10,000 stratified training issues)", "status": "completed" if has_sample else "pending"},
             {"name": "Knowledge Graph relational ontology & evidence layer", "status": "completed" if has_kg else "pending"},
-            {"name": "Single-call, four-perspective audit (1,000 issues)", "status": "completed" if has_audited else "pending"},
+            {"name": f"Single-call, four-perspective audit ({audit_count:,} issues)", "status": "completed" if has_audited else "pending"},
             {"name": "Audited-label treatment model", "status": "completed" if (PROJECT_ROOT / "outputs/models/treatment/xgb_treatment.json").exists() else "pending"},
             {"name": "Treatment inference readiness", "status": "completed" if has_treatment else treatment_readiness["status"]},
-            {"name": "Paired baseline/treatment evaluation", "status": "completed" if has_comparison and treatment_readiness["ready"] else "pending"},
+            {"name": "Same-test-set baseline/treatment metrics (configuration match unverified)", "status": "available_review_required" if has_comparison and treatment_readiness["ready"] else "pending"},
         ],
     }
 
@@ -535,6 +537,9 @@ async def predict_uploaded_issues(
 def audit_overview() -> dict[str, Any]:
     """Return counts and protocol provenance from the retained audit output."""
     records = _load_audit_records()
+    sample_summary = _read_json(PROJECT_ROOT / "outputs/results/audit_sampling/audit_train_sample_10000_summary.json") or {}
+    treatment_summary = _read_json(PROJECT_ROOT / "outputs/results/treatment/treatment_dataset_summary_current.json") or {}
+    sample_parquet = PROJECT_ROOT / "data/processed/audit_train_sample_10000.parquet"
     flips = sum(bool(r.get("label_flipped")) for r in records)
     methods: dict[str, int] = {}
     for record in records:
@@ -550,7 +555,10 @@ def audit_overview() -> dict[str, Any]:
     partial = sum(.65 <= float(r.get("agent_agreement", 0)) < .99 for r in records)
     return {
         "status": "completed" if records else "pending", "totalIssues": DATASET_STATS["totalIssues"],
-        "auditSampleSize": 5000, "selectedAuditSize": 1000, "totalAudited": len(records),
+        "auditSampleSize": sample_summary.get("sample_size_actual", len(records)),
+        "selectedAuditSize": len(records), "totalAudited": len(records),
+        "trainingRecords": treatment_summary.get("training_records"),
+        "auditIssueTextAvailable": sample_parquet.exists(),
         "labelsChanged": flips, "labelChangeRate": round(flips / len(records) * 100, 2) if records else 0,
         "agentAgreement": {"allAgree": unanimous, "twoOfThree": partial, "noMajority": len(records) - unanimous - partial},
         "bySource": by_source,
@@ -587,7 +595,9 @@ def _load_audit_issue_lookup() -> dict[tuple[str, str, str], dict[str, Any]]:
     global _audit_issue_cache
     if _audit_issue_cache is None:
         _audit_issue_cache = {}
-        sample_path = PROJECT_ROOT / "data/processed/audit_train_sample_1000_from_5000.parquet"
+        sample_path = PROJECT_ROOT / "data/processed/audit_train_sample_10000.parquet"
+        if not sample_path.exists():
+            sample_path = PROJECT_ROOT / "data/processed/audit_train_sample_1000_from_5000.parquet"
         if sample_path.exists():
             columns = ["source", "project", "issue_id", "title", "description"]
             frame = pd.read_parquet(sample_path, columns=columns)
@@ -767,7 +777,7 @@ def model_comparison() -> dict[str, Any]:
             "trainingRecords": treatment_context.get("training_records"),
         },
         "treatmentStatus": readiness["status"],
-        "comparisonStatus": "comparable" if readiness["ready"] and same_test_split else "protocol_blocked" if readiness["status"] == "blocked" else "test_split_mismatch",
+        "comparisonStatus": "configuration_unverified" if readiness["ready"] and same_test_split else "protocol_blocked" if readiness["status"] == "blocked" else "test_split_mismatch",
         "metrics": metrics_list,
     }
 

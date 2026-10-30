@@ -2,7 +2,7 @@
 
 This research project studies whether auditing BugHub issue labels with language-model reasoning can improve a Software Defect Prediction (SDP) classifier.
 
-The experiment is designed to compare two models trained on the **same training identities and text features**, changing only training labels. The retained model artifacts share test identities, but their XGBoost configurations differ; a matched treatment rerun is still needed before claiming a controlled comparison.
+The experiment compares an original-label baseline with a treatment whose training targets use Judge labels for audited records. The retained baseline and treatment metrics use the same frozen test identities, but available artifacts do not verify that the XGBoost configurations match. Treat current metric differences as descriptive until a configuration-matched rerun is completed.
 
 - **Baseline:** BugHub's original source label for every training issue.
 - **Treatment:** the Judge label for audited training issues and the original label for all other training issues.
@@ -27,24 +27,24 @@ flowchart TD
     K --> L[FastAPI and React inference dashboard]
 ```
 
-## Current state — 28 October 2026
+## Current state — 30 October 2026
 
 | Stage | State and outcome |
 |---|---|
 | Canonical data and EDA | Complete. Canonical Parquet has 926,461 records: 648,841 `bug`, 277,620 `non-bug`. |
 | Model-ready frozen split | Available: 648,424 train, 138,948 validation, 138,949 test (926,321 total; seed 42). |
 | Baseline | Locally trained and tuned on CUDA using the frozen split. Current held-out accuracy 0.8043, ROC-AUC 0.8561, macro-F1 0.7546. Model/results are retained under `outputs/models/baseline/fixed_split/tuned_xgboost/` and `outputs/results/baseline/fixed_split/tuned_xgboost/`. |
-| Knowledge Graph | Rebuilt from the 648,424 frozen training rows only. The audit retriever now reads this split and excludes each target issue from its own label-derived priors. Artifacts are under `outputs/knowledge_graph/train_only/`. |
-| Audit sampling | 5,000 training-only candidates across 79 projects; a nested, stratified 1,000-record sample was selected. |
-| Agent audit | Complete for 1,000 training-only records using **one LLM call that returns Policy, Data, Pattern, and Judge perspectives**. 170 Judge labels differ from the preserved source labels (17%). The perspectives are not independent model calls or statistical measurements. |
-| Treatment dataset | Built from all 648,424 frozen training records. Judge labels are used for the 1,000 audited identities; source labels remain for the other 647,424. Original labels are preserved; validation and test labels are unchanged. |
-| Treatment model | Trained and evaluated on the frozen 138,949-row test set. Accuracy 0.7850, balanced accuracy 0.7183, macro-F1 0.7291, ROC-AUC 0.8300, MCC 0.4644, Brier score 0.1483. Artifacts are under `outputs/models/treatment/` and `outputs/results/treatment/`. |
-| Comparison status | Treatment and tuned baseline metrics have matching test identity hashes, but treatment uses the regular `baseline_config.yaml` XGBoost settings while baseline uses separately tuned parameters. Treat their metric contrast as **not a fully controlled matched-model comparison** until treatment is retrained with the tuned baseline parameters. The existing comparison chart uses older baseline metrics and must not be presented as the current tuned comparison. |
-| Application | FastAPI backend and React frontend are present. Treatment inference uses the local treatment model; low-confidence review and OOD detection remain disabled pending validated thresholds. |
+| Knowledge Graph | Training-only graph built from the 648,424 frozen training rows; summary reports 2,571 nodes and 2,570 edges. Artifacts are under `outputs/knowledge_graph/train_only/`. |
+| Audit sample | A 10,000-record stratified sample was selected from the frozen training split across 79 projects (seed 42). Its selection summary and identity list are under `outputs/results/audit_sampling/`. |
+| Agent audit | 10,000 records completed using **one LLM call returning Policy, Data, Pattern, and Judge perspectives**. 1,573 Judge labels differ from source labels (15.73%). These are role outputs from one model response, not independent calls or verified ground truth. |
+| Treatment dataset | The current treatment summary records 648,424 training rows: Judge labels for 10,000 audited identities and source labels for the remaining 638,424. It records 1,573 label changes, preservation of `original_label`, and unchanged validation/test labels. The treatment training Parquet is absent from this checkout, so the merged rows cannot be independently inspected here. |
+| Treatment model | Current saved model was evaluated on the frozen 138,949-row test set: accuracy 0.7849, balanced accuracy 0.7183, macro-F1 0.7290, ROC-AUC 0.8299, MCC 0.4642, and Brier score 0.1483 (threshold 0.55). Artifacts are under `outputs/models/treatment/` and `outputs/results/treatment/`. |
+| Comparison status | The retained baseline metrics (`outputs/results/baseline/full/metrics.json`) and treatment metrics have the same test identity hash. The baseline is not the separately tuned baseline shown above, and available artifacts do not establish a matched XGBoost configuration. Current differences are descriptive; do not present them as an isolated causal effect of label auditing. The comparison figure was regenerated on 30 October from the current comparison summary. |
+| Application | FastAPI backend and React frontend support text and CSV/XLSX treatment inference. Local DeBERTa and XGBoost inference explicitly require CUDA; low-confidence review and OOD detection remain disabled. The audit and comparison views report current artifact counts and separate inference readiness from experimental-comparison limitations. |
 
 ### Current audit and treatment counts
 
-The selected 1,000-record audit sample is nested within the 5,000-record training sample, stratified by project and original label, and verified to contain unique identities from the frozen training split. The completed audit records are in `outputs/results/audited_train_1000_onecall/audited_records.json`; the treatment dataset summary is in `outputs/results/treatment/treatment_dataset_summary_current.json`.
+The selected 10,000-record audit sample was stratified by project and original label and selected from the frozen training split. Completed audit records are in `outputs/results/audited_train_10000/audited_records.json`; the current treatment summary is in `outputs/results/treatment/treatment_dataset_summary_current.json`. The 10,000-row audit candidate Parquet and merged treatment training Parquet are absent from this checkout, so those row-level inputs should be restored for a fully reproducible rebuild.
 
 The new training-only graph is built with `python -m src.knowledge_graph.build_training_kg`. It reads only `data/processed/fixed_splits/train.parquet`; the retriever excludes the current issue's original label from its own project/component/severity rates. The previous mixed-split graph artifacts are historical and are not used by the new audit retriever.
 
@@ -77,11 +77,11 @@ Labels:            bug / non-bug
 
 The existing baseline pipeline uses `model_text` as input, extracts frozen embeddings with `microsoft/deberta-v3-small`, and trains a regularized XGBoost classifier. Baseline training uses all 648,424 rows of the frozen training split with `original_label`. Validation is used for model selection/early stopping; test is reserved for evaluation.
 
-The current baseline is the 15-trial tuned CUDA XGBoost model selected on validation ROC-AUC. Its held-out test accuracy is **0.8043**, ROC-AUC **0.8561**, and macro-F1 **0.7546**, on the frozen 138,949-row test split (identity SHA-256 `cc5b147ddba1b01bf252c0ab2d3b0b596bb3674a80458d8f3976208a2f53b0a1`). It uses all 648,424 frozen training rows with `original_label`. The current model and threshold are in `outputs/models/baseline/fixed_split/tuned_xgboost/`; metrics, best parameters, trial history, and classification report are in `outputs/results/baseline/fixed_split/tuned_xgboost/`. Older full-dataset and untuned fixed-split model outputs were removed to avoid ambiguity. Use this tuned configuration for any paired treatment comparison.
+The current baseline is the 15-trial tuned CUDA XGBoost model selected on validation ROC-AUC. Its held-out test accuracy is **0.8043**, ROC-AUC **0.8561**, and macro-F1 **0.7546**, on the frozen 138,949-row test split (identity SHA-256 `cc5b147ddba1b01bf252c0ab2d3b0b596bb3674a80458d8f3976208a2f53b0a1`). It uses all 648,424 frozen training rows with `original_label`. The current model and threshold are in `outputs/models/baseline/fixed_split/tuned_xgboost/`; metrics, best parameters, trial history, and classification report are in `outputs/results/baseline/fixed_split/tuned_xgboost/`. Older regular-baseline metrics remain under `outputs/results/baseline/full/` for descriptive comparison, but they are not the tuned baseline reported here. Use the tuned configuration for a future configuration-matched treatment run.
 
 ### Treatment
 
-The retained treatment dataset and model use the completed one-call, four-perspective audit. For each audited training identity, the Judge label replaces the training target; other training rows retain their source label:
+The current treatment summary and model use the 10,000-record one-call, four-perspective audit. For each audited training identity, the Judge label replaces the training target; other training rows retain their source label:
 
 ```text
 if identity has a valid Judge audit:
@@ -90,7 +90,7 @@ else:
     treatment_label = original_label
 ```
 
-Keep `original_label` unchanged. The retained treatment uses the same frozen split identities and DeBERTa text embeddings, but its saved run used the regular `baseline_config.yaml` XGBoost configuration rather than the tuned baseline parameters. Retrain it with the tuned parameters and the same validation-based threshold-selection policy before interpreting the paired results as isolating label changes.
+Keep `original_label` unchanged. The treatment summary records the same frozen split and unchanged validation/test labels. Its metrics use the same test identity digest as the retained regular baseline metrics, but available artifacts do not establish that model parameters and threshold-selection policy match. Retrain treatment with the selected baseline configuration and identical validation-based threshold policy before interpreting the comparison as isolating label changes.
 
 Do not interpret a gain in predictive metrics as proof that the audit labels are correct. Without an independently verified label set, the experiment measures downstream model changes associated with this label-replacement procedure.
 
@@ -147,57 +147,55 @@ Inference can initially run locally: apply the same `model_text` construction, e
 
 ### Select training-only audit candidates
 
-The 5,000-row queue is selected from `train.parquet`; the 1,000-row candidate sample is nested within that queue.
+The current 10,000-row audit sample is selected from `train.parquet` with seed 42 and stratification by project and original label. A separate 5,000-row sample belongs to an earlier audit stage; it is not the current audit input.
 
 ```powershell
-python -m src.audit_sampling.create_audit_sample --dataset data/processed/fixed_splits/train.parquet --sample-output data/processed/audit_train_sample.parquet --summary-output outputs/results/audit_sampling/audit_train_sample_summary.json --ids-output outputs/results/audit_sampling/audit_train_sample_ids.csv --sample-size 5000 --random-seed 42
-python -m src.audit_sampling.create_audit_sample --dataset data/processed/audit_train_sample.parquet --sample-output data/processed/audit_train_sample_1000_from_5000.parquet --summary-output outputs/results/audit_sampling/audit_train_sample_1000_from_5000_summary.json --ids-output outputs/results/audit_sampling/audit_train_sample_1000_from_5000_ids.csv --sample-size 1000 --random-seed 42
+python -m src.audit_sampling.create_audit_sample --dataset data/processed/fixed_splits/train.parquet --sample-output data/processed/audit_train_sample_10000.parquet --summary-output outputs/results/audit_sampling/audit_train_sample_10000_summary.json --ids-output outputs/results/audit_sampling/audit_train_sample_10000_ids.csv --sample-size 10000 --random-seed 42
 ```
 
 ### Run or resume an audit
 
-Build the training-only graph first, then use the one-call four-perspective audit runner when repeating the audit. Configure provider credentials through environment variables; do not put secrets in version-controlled files. The retained completed audit is the one-call run described above. `src/agents/orchestrator.py` represents the older separate-call workflow; its failed attempt is not the source of treatment labels.
+Build the training-only graph first, then use the one-call four-perspective audit runner when repeating the audit. Configure provider credentials through environment variables; do not put secrets in version-controlled files. The retained current audit is the 10,000-record output described above. `src/agents/orchestrator.py` represents an older separate-call workflow and is not the source of current treatment labels.
 
 ```powershell
 python -m src.knowledge_graph.build_training_kg
-python -m src.agents.audit_remaining_800
+python -m src.agents.audit_sample_runner --help
 ```
 
-The completed records are retained at `outputs/results/audited_train_1000_onecall/audited_records.json`. The command above is for rerunning/resuming this one-call audit path; check provider access and its configured checkpoint paths before launching it. The separate-call orchestrator is not the method used for current treatment labels.
+The completed records are retained at `outputs/results/audited_train_10000/audited_records.json`. Check the runner's configured paths, provider access, and sample availability before launching a new audit. The separate-call orchestrator is not the method used for current treatment labels.
 
-The audit runner's automatic treatment-build callback currently invokes the dataset builder without overriding its older separate-call JSON default. If rerunning from scratch, verify that callback's input path or run the explicit treatment-build command below with `--audited-json outputs/results/audited_train_1000_onecall/audited_records.json`.
+Before rebuilding treatment, pass the current audit JSON explicitly; do not rely on older defaults that may point to the 1,000-record run.
 
 ### Build and train the treatment
 
 After auditing with a train-only graph, rebuild the treatment dataset from the complete frozen training split. `--overwrite` is needed when rebuilding an existing file.
 
 ```powershell
-python -m src.treatment.build_treatment_dataset --audited-json outputs/results/audited_train_1000_onecall/audited_records.json --overwrite
+python -m src.treatment.build_treatment_dataset --audited-json outputs/results/audited_train_10000/audited_records.json --overwrite
 python -m src.treatment.train_treatment_model --dataset-path data/processed/fixed_splits/treatment_train.parquet --config configs/baseline_config.yaml
-python -m src.treatment.compare_baseline_treatment --baseline-metrics outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json --treatment-metrics outputs/results/treatment/metrics.json
+python -m src.treatment.compare_baseline_treatment --baseline-metrics outputs/results/baseline/full/metrics.json --treatment-metrics outputs/results/treatment/metrics.json
 ```
 
-The treatment command above reproduces the retained treatment configuration; it does not yet match the tuned baseline parameters. Do not use its generated chart to claim an isolated label-treatment effect. First train treatment with the tuned baseline XGBoost parameters and threshold-selection procedure. The comparison script checks matching test identity hashes and row counts, but those checks alone do not ensure matched model configurations.
+The comparison command above reproduces the retained descriptive comparison. The treatment command uses regular `baseline_config.yaml` settings; matching test hashes and row counts do not prove matching model configurations. Do not claim an isolated label-treatment effect until treatment is retrained with the tuned baseline's selected XGBoost parameters and threshold-selection policy.
 
 ## Existing outputs
 
 | Purpose | Path |
 |---|---|
-| 5,000 training-only audit candidates | `data/processed/audit_train_sample.parquet` |
-| Nested 1,000 candidate sample | `data/processed/audit_train_sample_1000_from_5000.parquet` |
-| 5,000 training-only candidates | `data/processed/audit_train_sample.parquet` |
-| Nested 1,000 audit candidates | `data/processed/audit_train_sample_1000_from_5000.parquet` |
-| Audit completion | 1,000 records from the one-call four-perspective run: `outputs/results/audited_train_1000_onecall/audited_records.json` |
-| Treatment dataset/model | Retained one-call treatment artifacts: `data/processed/fixed_splits/treatment_train.parquet`, `outputs/results/treatment/`, and `outputs/models/treatment/` |
+| Current 10,000-record audit selection summary | `outputs/results/audit_sampling/audit_train_sample_10000_summary.json` |
+| Current 10,000-record audit IDs | `outputs/results/audit_sampling/audit_train_sample_10000_ids.csv` |
+| Audit completion | 10,000 one-call, four-perspective records: `outputs/results/audited_train_10000/audited_records.json` |
+| Treatment summary and metrics | `outputs/results/treatment/treatment_dataset_summary_current.json` and `outputs/results/treatment/metrics.json` |
+| Treatment model | `outputs/models/treatment/xgb_treatment.json` |
 | Current tuned baseline metrics | `outputs/results/baseline/fixed_split/tuned_xgboost/metrics.json` |
 
-The selected candidate samples and completed audit records are retained for reproducibility. Rebuild the treatment dataset only from valid Judge labels that match the frozen training audit sample.
+The current selection summary, identity list, completed audit records, model, and metrics are retained. The audit candidate Parquet and merged treatment training Parquet are missing in this checkout; restore or regenerate them before attempting a row-level treatment rebuild. Rebuild only from valid Judge labels whose identities match the frozen training audit sample.
 
 ### Shared data files
 
-The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The completed 1,000-row single-call, four-perspective audit at `outputs/results/audited_train_1000_onecall/audited_records.json` is the source of current treatment labels.
+The frozen `train.parquet`, `validation.parquet`, and `test.parquet` files in `data/processed/fixed_splits/` are versioned with Git LFS; `split_manifest.json` records their row counts and identity hashes. Install Git LFS before cloning or pulling so the Parquet contents are downloaded. The current 10,000-row single-call, four-perspective audit at `outputs/results/audited_train_10000/audited_records.json` is the source identified by the current treatment summary.
 
-For the current agent audit, `data/processed/audit_train_sample.parquet` is a reproducible 5,000-row sample from the frozen training split, and `data/processed/audit_train_sample_1000_from_5000.parquet` is the nested 1,000-row audit queue. Both use seed 42 and cover 79 projects; their selection summaries and identity lists are in `outputs/results/audit_sampling/`. One expired 2019 signed-download URL in a sampled issue had its AWS authentication query removed; the issue identity, label, and remaining text were preserved. The older `audit_sample.parquet` was sampled from the full canonical dataset, so it can include validation/test records and must not be used for agent training. The full canonical Parquet is not needed to run the audit or paired model experiment: the frozen split files and training-only samples provide the required inputs.
+The current audit selection summary and ID list are under `outputs/results/audit_sampling/`. In this checkout, `data/processed/audit_train_sample_10000.parquet` and `data/processed/fixed_splits/treatment_train.parquet` are absent; restore or regenerate them before rebuilding treatment. The older `audit_sample.parquet` was sampled from the full canonical dataset, so it can include validation/test records and must not be used for agent training. The full canonical Parquet is not needed to run the audit or paired model experiment: frozen splits and a training-only sample provide the required inputs.
 
 ## API and dashboard
 
@@ -215,7 +213,7 @@ npm ci
 npm run dev
 ```
 
-The frontend defaults to the API at `http://127.0.0.1:8000`; override `VITE_API_BASE_URL` when using another port. OpenAPI documentation is available at `http://127.0.0.1:8000/docs`; the frontend usually serves at `http://127.0.0.1:5173/`. Treatment inference is available when the one-call audit provenance, treatment artifacts, and test identity checks pass. Low-confidence review and OOD detection remain disabled until validated thresholds are available. Matching test identities do not by themselves establish a controlled baseline/treatment comparison; treatment must also use the baseline's tuned classifier settings.
+The frontend defaults to the API at `http://127.0.0.1:8000`; override `VITE_API_BASE_URL` when using another port. OpenAPI documentation is available at `http://127.0.0.1:8000/docs`; the frontend usually serves at `http://127.0.0.1:5173/`. Treatment inference checks audit provenance and saved artifacts, then requires CUDA for local DeBERTa/XGBoost inference; it does not fall back to CPU. Low-confidence review and OOD detection remain disabled until validated thresholds are available. Matching test identities do not by themselves establish a controlled baseline/treatment comparison.
 
 ## Data safety and reproducibility rules
 
