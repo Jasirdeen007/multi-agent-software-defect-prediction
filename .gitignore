@@ -16,7 +16,6 @@ sgent.env.txt
 *.parquet.gz
 !data/processed/fixed_splits/*.parquet
 data/processed/backup_splits/
-data/processed/fixed_splits/treatment_train.parquet
 !data/processed/audit_train_sample.parquet
 !data/processed/audit_train_sample_1000_from_5000.parquet
 bughubs_canonical.parquet
